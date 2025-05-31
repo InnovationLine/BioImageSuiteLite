@@ -1,0 +1,318 @@
+git clone [https://github.com/yourusername/BioImageSuiteLite.git](https://github.com/yourusername/BioImageSuiteLite.git) # Change this
+cd BioImageSuiteLite
+pip install -e .
+
+
+Quick Start
+To launch the application:
+bioimagesuitelite
+
+
+manual run without goint with the package route is below 
+-----------------------------------------------------------
+python -m BioImageSuiteLite.gui_manager
+
+python -m: This tells Python to load a module as a script.
+BioImageSuiteLite.gui_manager: This is the path to your gui_manager.py file, treating BioImageSuiteLite as a package.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# BioImageSuiteLite/examples/basic_workflow.ipynb
+# This would be a Jupyter Notebook. Here's the conceptual Python code:
+"""
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# BioImageSuiteLite: Basic Workflow Example\n",
+    "\n",
+    "This notebook demonstrates a basic programmatic workflow using components of BioImageSuiteLite.\n",
+    "For the full GUI experience, run `bioimagesuitelite` from your terminal after installation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "from BioImageSuiteLite import io_operations, roi_handler, analysis_processor\n",
+    "import os\n",
+    "\n",
+    "# Configure logging for detailed output (optional)\n",
+    "import logging\n",
+    "from BioImageSuiteLite import utilities\n",
+    "logger = utilities.setup_logging(level=logging.INFO)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 1. Load an AVI File\n",
+    "\n",
+    "You'll need a sample `.avi` file. Place it in the `data/` directory or provide a full path."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Create a dummy AVI if you don't have one for quick testing (requires opencv-python)\n",
+    "def create_dummy_avi(filename='data/sample_notebook.avi', frames=20, width=64, height=64, fps=10):\n",
+    "    import cv2\n",
+    "    if not os.path.exists('data'): os.makedirs('data')\n",
+    "    if os.path.exists(filename): return filename # Don't recreate if exists\n",
+    "\n",
+    "    fourcc = cv2.VideoWriter_fourcc(*'XVID') # or MJPG\n",
+    "    out = cv2.VideoWriter(filename, fourcc, fps, (width, height))\n",
+    "    if not out.isOpened():\n",
+    "        print(f\"Error: Could not open video writer for {filename}\")\n",
+    "        return None\n",
+    "\n",
+    "    for i in range(frames):\n",
+    "        # Create a simple frame with a moving square\n",
+    "        frame = np.zeros((height, width, 3), dtype=np.uint8)\n",
+    "        x = (i * 5) % width\n",
+    "        y = (i * 3) % height\n",
+    "        cv2.rectangle(frame, (x, y), (x + 10, y + 10), (0, 255, 0), -1)\n",
+    "        out.write(frame)\n",
+    "    out.release()\n",
+    "    print(f\"Created dummy AVI: {filename}\")\n",
+    "    return filename\n",
+    "\n",
+    "avi_file_path = create_dummy_avi() # Creates 'data/sample_notebook.avi'\n",
+    "# avi_file_path = 'path/to/your/actual.avi'\n",
+    "\n",
+    "if avi_file_path and os.path.exists(avi_file_path):\n",
+    "    raw_frames, metadata = io_operations.load_avi(avi_file_path)\n",
+    "    if raw_frames:\n",
+    "        print(f\"Loaded: {metadata['file_path']}\")\n",
+    "        print(f\"Frames: {metadata['frame_count']}, FPS: {metadata['fps']:.2f}, Size: {metadata['height']}x{metadata['width']}\")\n",
+    "        \n",
+    "        # Display first frame (optional)\n",
+    "        # plt.imshow(cv2.cvtColor(raw_frames[0], cv2.COLOR_BGR2RGB))\n",
+    "        # plt.title(\"First Frame (Color)\")\n",
+    "        # plt.show()\n",
+    "    else:\n",
+    "        print(f\"Failed to load {avi_file_path}\")\n",
+    "else:\n",
+    "    print(f\"AVI file not found or not created: {avi_file_path}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2. Convert to Greyscale and Save as Multi-TIFF"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "if 'raw_frames' in locals() and raw_frames:\n",
+    "    greyscale_stack = io_operations.convert_to_greyscale_stack(raw_frames)\n",
+    "    if greyscale_stack is not None:\n",
+    "        print(f\"Greyscale stack shape: {greyscale_stack.shape} (T, H, W)\")\n",
+    "        \n",
+    "        # Display first greyscale frame (optional)\n",
+    "        # plt.imshow(greyscale_stack[0], cmap='gray')\n",
+    "        # plt.title(\"First Frame (Greyscale)\")\n",
+    "        # plt.show()\n",
+    "        \n",
+    "        # Save to TIFF\n",
+    "        tiff_output_path = 'data/output_stack.tif'\n",
+    "        success = io_operations.save_to_multitiff(greyscale_stack, tiff_output_path, metadata)\n",
+    "        if success:\n",
+    "            print(f\"Saved greyscale stack to {tiff_output_path}\")\n",
+    "        else:\n",
+    "            print(f\"Failed to save TIFF.\")\n",
+    "else:\n",
+    "    print(\"raw_frames not available for greyscale conversion.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Define an ROI and Get Intensity Trace"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "if 'greyscale_stack' in locals() and greyscale_stack is not None:\n",
+    "    image_shape_thw = greyscale_stack.shape\n",
+    "    roi_manager = roi_handler.ROIManager(image_shape_thw)\n",
+    "    \n",
+    "    # Define a sample polygonal ROI (vertices as [row, col] or [y, x])\n",
+    "    # For a 64x64 image, let's define a square in the middle\n",
+    "    h, w = image_shape_thw[1], image_shape_thw[2]\n",
+    "    roi_vertices = np.array([\n",
+    "        [h//4, w//4],       # Top-left\n",
+    "        [h//4, 3*w//4],     # Top-right\n",
+    "        [3*h//4, 3*w//4],   # Bottom-right\n",
+    "        [3*h//4, w//4]      # Bottom-left\n",
+    "    ])\n",
+    "    \n",
+    "    added_roi = roi_manager.add_roi(roi_vertices)\n",
+    "    if added_roi:\n",
+    "        pixel_size_um = 0.16 # Example\n",
+    "        added_roi.set_area_physical(pixel_size_um)\n",
+    "        print(f\"Added ROI {added_roi.id}, Area: {added_roi.area_pixels:.1f} px, {added_roi.area_sq_um or 0:.2f} µm²\")\n",
+    "\n",
+    "        intensity_trace = added_roi.get_mean_intensity_trace(greyscale_stack)\n",
+    "        if intensity_trace is not None:\n",
+    "            print(f\"Intensity trace shape: {intensity_trace.shape}\")\n",
+    "            \n",
+    "            # Plot intensity trace (optional)\n",
+    "            # plt.figure(figsize=(10, 4))\n",
+    "            # plt.plot(intensity_trace)\n",
+    "            # plt.title(f\"Mean Intensity Trace for ROI {added_roi.id}\")\n",
+    "            # plt.xlabel(\"Frame Number\")\n",
+    "            # plt.ylabel(\"Mean Intensity\")\n",
+    "            # plt.show()\n",
+    "    else:\n",
+    "        print(\"Failed to add ROI.\")\n",
+    "else:\n",
+    "    print(\"greyscale_stack not available for ROI analysis.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 4. Event Detection (Example: Thresholding)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "if 'intensity_trace' in locals() and intensity_trace is not None and 'added_roi' in locals() and added_roi:\n",
+    "    fps = metadata.get('fps', 10.0) # Get FPS from metadata or use default\n",
+    "    \n",
+    "    # Threshold detection\n",
+    "    # For dummy AVI, intensity is often 0 or a fixed value. Otsu might fail or give trivial threshold.\n",
+    "    # Using a fixed threshold here or ensuring dummy AVI has varying intensity.\n",
+    "    # Let's try with Otsu first, then fallback if needed.\n",
+    "    try:\n",
+    "        threshold_events = analysis_processor.detect_events_threshold(\n",
+    "            intensity_trace, fps, added_roi.id, use_otsu=True, min_duration_frames=2\n",
+    "        )\n",
+    "    except ValueError as e:\n",
+    "        print(f\"Otsu failed ({e}), trying fixed threshold.\")\n",
+    "        # If dummy AVI has green square (value 255 for green channel, mean might be ~85 gray)\n",
+    "        # If background is 0, then a value like 20 might work for the green square.\n",
+    "        threshold_events = analysis_processor.detect_events_threshold(\n",
+    "            intensity_trace, fps, added_roi.id, threshold_value=20, min_duration_frames=2\n",
+    "        )\n",
+    "\n",
+    "    print(f\"\\nThreshold Detection Results (ROI {added_roi.id}):\")\n",
+    "    if threshold_events:\n",
+    "        for event in threshold_events:\n",
+    "            print(event)\n",
+    "    else:\n",
+    "        print(\"No events found by thresholding.\")\n",
+    "    \n",
+    "    # DoG Detection\n",
+    "    dog_events = analysis_processor.detect_events_dog(\n",
+    "        intensity_trace, fps, added_roi.id, sigma1=1.0, sigma2=2.0, min_prominence=0.5 # Adjust prominence based on trace\n",
+    "    )\n",
+    "    print(f\"\\nDoG Detection Results (ROI {added_roi.id}):\")\n",
+    "    if dog_events:\n",
+    "        for event in dog_events:\n",
+    "            print(event)\n",
+    "    else:\n",
+    "        print(\"No events found by DoG.\")\n",
+    "\n",
+    "    # Combine and Filter\n",
+    "    all_raw_events = threshold_events + dog_events\n",
+    "    if all_raw_events:\n",
+    "        filtered_events = analysis_processor.filter_duplicate_events(all_raw_events, min_separation_seconds=0.5)\n",
+    "        print(f\"\\nFiltered Events (ROI {added_roi.id}):\")\n",
+    "        for event in filtered_events:\n",
+    "            print(event)\n",
+    "        \n",
+    "        # Normalization\n",
+    "        num_filtered = len(filtered_events)\n",
+    "        observation_duration_s = greyscale_stack.shape[0] / fps\n",
+    "        roi_area_um2 = added_roi.area_sq_um\n",
+    "        \n",
+    "        if roi_area_um2 and roi_area_um2 > 0:\n",
+    "            normalized_rate = analysis_processor.normalize_event_rate(\n",
+    "                num_filtered, observation_duration_s, roi_area_um2\n",
+    "            )\n",
+    "            print(f\"\\nNormalized Event Rate (ROI {added_roi.id}): {normalized_rate:.4e} events/second/sq.µm\")\n",
+    "        else:\n",
+    "            print(f\"\\nCannot calculate normalized rate for ROI {added_roi.id} due to zero area.\")\n",
+    "    else:\n",
+    "        print(\"\\nNo raw events to filter or normalize.\")\n",
+    "else:\n",
+    "    print(\"Intensity trace or ROI not available for event detection.\")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+"""

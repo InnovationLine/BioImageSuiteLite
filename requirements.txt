@@ -1,0 +1,11 @@
+# requirements.txt
+
+numpy
+scipy
+opencv-python-headless
+tifffile
+scikit-image
+napari[all]
+shapely
+ruptures
+matplotlib
