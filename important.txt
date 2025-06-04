@@ -16,6 +16,16 @@ python -m: This tells Python to load a module as a script.
 BioImageSuiteLite.gui_manager: This is the path to your gui_manager.py file, treating BioImageSuiteLite as a package.
 
 
+1. open gitbash
+2. cd c:/rinki/project_work/BioImageSuiteLite
+3. code .
+4. in vs code if terminal is not open  .. go to terminal and select new terminal .. 
+5. paste the following in the terminal and then press enter
+	source ../photons_events_realtime/venv_photon/Scripts/activate
+
+6. then paste and enter the following to start your app
+   python -m BioImageSuiteLite.gui_manager
+
 
 
 
