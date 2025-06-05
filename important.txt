@@ -16,6 +16,11 @@ python -m: This tells Python to load a module as a script.
 BioImageSuiteLite.gui_manager: This is the path to your gui_manager.py file, treating BioImageSuiteLite as a package.
 
 
+you can confirm the file fps and image with the following command 
+
+$ ffmpeg -i input/vvs4_2.avi
+
+
 
 
 

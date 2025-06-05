@@ -33,3 +33,5 @@ results/
 coverage.xml
 htmlcov/
 bio_venv/
+input/
+test.py

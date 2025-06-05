@@ -32,25 +32,59 @@ def load_avi(file_path: str) -> Tuple[Optional[List[np.ndarray]], Optional[Dict[
             frames.append(frame)
 
         fps = cap.get(cv2.CAP_PROP_FPS)
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        # Default values from cap.get initially
+        frame_count_meta = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        height_meta = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        width_meta = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
         cap.release()
 
         if not frames:
-            logger.warning(f"No frames extracted from {file_path}. File might be empty or corrupted.")
+            logger.warning(f"No frames extracted from {file_path}. File might be empty or corrupted after attempting to read all frames.")
+            # Try to return metadata from cap.get if it was opened, but log that frames are missing
+            if cap.isOpened(): # Should be false here as it's released, but good to be defensive
+                 metadata_fallback = {
+                    "file_path": file_path,
+                    "fps": fps,
+                    "frame_count": 0, # Explicitly 0 as no frames were read into the list
+                    "height": height_meta,
+                    "width": width_meta,
+                    "original_format": "AVI",
+                    "notes": "File opened but no frames could be read into the list."
+                }
+                 logger.info(f"Fallback metadata for {file_path}: Frames: 0 (cap.get said {frame_count_meta}), FPS: {fps}, Dimensions: {height_meta}x{width_meta}")
+                 return [], metadata_fallback # Return empty list and fallback metadata
             return None, None
+
+        # Update frame count, height, and width from the actual frames read
+        actual_frame_count = len(frames)
+        if actual_frame_count > 0:
+            # Assuming all frames have the same dimensions as the first frame
+            # For color frames (BGR), shape is (height, width, channels)
+            # For grayscale, shape could be (height, width)
+            first_frame_shape = frames[0].shape
+            actual_height = first_frame_shape[0]
+            actual_width = first_frame_shape[1]
+            logger.info(f"Frame details from actual read data: Count={actual_frame_count}, H={actual_height}, W={actual_width}")
+        else: # Should not happen if `if not frames:` check above is passed, but as a safeguard
+            actual_height = height_meta
+            actual_width = width_meta
+            logger.warning(f"Frame list was populated but reports zero length. Using cap.get() dimensions: H={height_meta}, W={width_meta}")
+
 
         metadata = {
             "file_path": file_path,
             "fps": fps,
-            "frame_count": frame_count,
-            "height": height,
-            "width": width,
+            "frame_count": actual_frame_count, # Use actual count
+            "height": actual_height,           # Use actual height
+            "width": actual_width,             # Use actual width
             "original_format": "AVI"
         }
-        logger.info(f"Successfully loaded {file_path}. Frames: {frame_count}, FPS: {fps}, Dimensions: {height}x{width}")
+        # Update log message to reflect actual read count if different from cap.get()
+        if actual_frame_count != frame_count_meta:
+            logger.info(f"Successfully loaded {file_path}. Actual Frames: {actual_frame_count} (cap.get reported: {frame_count_meta}), FPS: {fps}, Dimensions: {actual_height}x{actual_width}")
+        else:
+            logger.info(f"Successfully loaded {file_path}. Frames: {actual_frame_count}, FPS: {fps}, Dimensions: {actual_height}x{actual_width}")
         return frames, metadata
     except Exception as e:
         logger.error(f"An unexpected error occurred while loading AVI {file_path}: {e}")
