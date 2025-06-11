@@ -94,6 +94,11 @@ class BioImageSuiteLiteGUI:
         self.btn_clear_rois.clicked.connect(self._clear_all_rois)
         self.btn_clear_rois.setEnabled(False)
         preproc_layout.addRow(self.btn_clear_rois)
+
+        self.btn_auto_dog_params = QPushButton("Auto-set Params from ROI")
+        self.btn_auto_dog_params.clicked.connect(self._auto_set_dog_params)
+        preproc_layout.addRow(self.btn_auto_dog_params)
+
         controls_layout.addWidget(preproc_group)
 
         # == Analysis Parameters Group ==
@@ -207,6 +212,70 @@ class BioImageSuiteLiteGUI:
             for roi_obj in self.roi_manager.get_all_rois():
                 roi_obj.set_area_physical(self.pixel_size_um)
 
+    def _auto_set_dog_params(self):
+        """
+        Automatically estimates DoG parameters based on the currently selected ROI's intensity trace.
+        If multiple ROIs are selected, their traces are averaged.
+        """
+        if not self.roi_manager or not self.shapes_layer or self.greyscale_stack is None:
+            show_warning("Please load an image and draw at least one ROI first.")
+            return
+
+        selected_roi_indices = list(self.shapes_layer.selected_data)
+        if not selected_roi_indices:
+            show_warning("Please select one or more ROIs in the Shapes layer to auto-set parameters.")
+            return
+
+        all_traces = []
+        roi_ids_for_log = []
+
+        for roi_index in selected_roi_indices:
+            roi_obj = self.roi_manager.get_roi_by_shape_index(roi_index)
+            if not roi_obj:
+                show_error(f"Could not find ROI data for selected shape index {roi_index}.")
+                continue
+            
+            try:
+                intensity_trace = roi_obj.get_mean_intensity_trace(self.greyscale_stack)
+                if intensity_trace is not None:
+                    all_traces.append(intensity_trace)
+                    roi_ids_for_log.append(str(roi_obj.id))
+            except Exception as e:
+                show_error(f"Failed to calculate intensity for ROI {roi_obj.id}: {e}")
+                logger.error(f"Failed to calculate intensity for ROI {roi_obj.id}: {e}")
+        
+        if not all_traces:
+            show_warning("Could not calculate intensity traces for any of the selected ROIs.")
+            return
+
+        if len(all_traces) > 1:
+            show_info(f"Averaging traces from {len(all_traces)} ROIs: {', '.join(roi_ids_for_log)} to estimate parameters.")
+            try:
+                # Ensure all traces are the same length before averaging
+                if len(set(len(trace) for trace in all_traces)) > 1:
+                    show_error("Selected ROI traces have different lengths and cannot be averaged.")
+                    return
+                final_trace = np.mean(np.array(all_traces), axis=0)
+            except Exception as e:
+                show_error(f"Error averaging ROI traces: {e}")
+                logger.error(f"Error averaging traces: {e}")
+                return
+        else:
+            show_info(f"Estimating parameters from single selected ROI: {', '.join(roi_ids_for_log)}.")
+            final_trace = all_traces[0]
+
+        # Estimate parameters from the (potentially averaged) trace
+        estimated_params = analysis_processor.estimate_dog_params_from_trace(final_trace)
+
+        if estimated_params:
+            sigma1, sigma2, prominence = estimated_params
+            self.dog_sigma1_input.setValue(sigma1)
+            self.dog_sigma2_input.setValue(sigma2)
+            self.dog_prominence_input.setValue(prominence)
+            show_info(f"Successfully updated DoG parameters based on selection.")
+        else:
+            show_warning(f"Could not estimate DoG parameters for the selection. "
+                         "No significant peaks found in the intensity trace.")
 
     def _load_avi_action(self):
         file_path, _ = QFileDialog.getOpenFileName(self.main_widget, "Open AVI File", "", "AVI Files (*.avi)")
@@ -308,98 +377,54 @@ class BioImageSuiteLiteGUI:
         yield # Let napari handle the event
 
     def _on_roi_added_or_changed(self, event):
-        """Callback when shapes data changes (add, remove, modify)."""
+        """
+        Callback for when data is added or changed in the Shapes layer.
+        This is where we create or update our internal ROI representations.
+        """
         if not self.roi_manager or not self.shapes_layer:
-            logger.debug("ROI manager or shapes layer not ready.")
-            return       
+            return
 
-        raw_action = getattr(event, 'action', None)
-        # Convert the action to a lowercase string. If it's an enum, str() will often give 'Enum.MEMBER'.
-        # If it's already a string, it will just be a string.
-        action_str = ''
-        if raw_action is not None:
-            action_str = str(raw_action).lower()
-            if '.' in action_str: # Handles cases like 'ActionType.ADDED' -> 'added'
-                action_str = action_str.split('.')[-1]
+        # This event fires for any change, so we need to figure out what happened.
+        # The `event` object itself doesn't give us which shape was added,
+        # so we have to look at the full data and sync our state.
+        # A common way is to check for shapes that we don't have an ROI for yet.
+        
+        all_shape_indices = set(range(len(self.shapes_layer.data)))
+        known_roi_indices = {roi.shape_index for roi in self.roi_manager.get_all_rois()}
+        
+        new_shape_indices = all_shape_indices - known_roi_indices
 
-        logger.debug(f"Shapes layer data event: raw_action='{raw_action}', processed_action_str='{action_str}', current_mode='{self.shapes_layer.mode}'")
-
-
-        # Use lowercase string for comparison
-        if action_str == 'added': # Napari often uses 'added' or 'add'
-            added_indices = getattr(event, 'data_indices', tuple())
-            if not added_indices:
-                logger.debug("Action 'added', but no data_indices in event.")
-                return
-
-            current_shapes_data = getattr(event, 'value', self.shapes_layer.data) # Get the most recent data
-
-            for new_shape_idx in added_indices:
-                if new_shape_idx == -1: 
-                    new_shape_idx = len(current_shapes_data) - 1
-
-                if not (0 <= new_shape_idx < len(current_shapes_data)):
-                    logger.warning(f"Invalid new_shape_idx {new_shape_idx} from event.")
-                    continue
-
-                new_shape_data = current_shapes_data[new_shape_idx]
-                logger.debug(f"Processing 'added' shape at index {new_shape_idx}, data: {new_shape_data}")
-
-                if len(new_shape_data) < 3:
-                    show_warning(f"Shape at index {new_shape_idx} is too small (<3 vertices). Not added to ROIManager. User can delete manually from Napari.")
-                    continue 
-
-                vertices_for_roi = new_shape_data
-
-                already_managed = False
-                for existing_roi in self.roi_manager.get_all_rois():
-                    if existing_roi.vertices.shape == vertices_for_roi.shape and \
-                       np.array_equal(existing_roi.vertices, vertices_for_roi):
-                        logger.debug(f"Shape at index {new_shape_idx} already managed. Skipping.")
-                        already_managed = True
-                        break
-                if already_managed:
-                    continue
-
-                added_roi = self.roi_manager.add_roi(vertices_for_roi)
-                if added_roi:
-                    added_roi.set_area_physical(self.pixel_size_um)
-                    show_info(f"ROI {added_roi.id} added (Area: {added_roi.area_pixels:.1f} px, {added_roi.area_sq_um or 0:.2f} µm²).")
-
-                    # Property update attempt (simplified, may need more robust handling)
-                    try:
-                        props = self.shapes_layer.properties
-                        new_prop_entry = {'roi_manager_id': added_roi.id, 'name': f'ROI_{added_roi.id}'}
-                        if isinstance(props, dict): # Properties as dict of lists
-                            for key, value_list in new_prop_entry.items():
-                                if key not in props:
-                                    props[key] = [None] * len(current_shapes_data)
-                                elif len(props[key]) < len(current_shapes_data): # Pad if necessary
-                                    props[key].extend([None] * (len(current_shapes_data) - len(props[key])))
-                                props[key][new_shape_idx] = value_list # Assuming value_list is not a list here but the value itself
-                            self.shapes_layer.properties = props
-                        elif isinstance(props, list): # Properties as list of dicts
-                            if new_shape_idx < len(props):
-                                props[new_shape_idx].update(new_prop_entry)
-                            elif new_shape_idx == len(props):
-                                props.append(new_prop_entry)
-                            self.shapes_layer.properties = props
-                        self.shapes_layer.refresh_colors()
-                    except Exception as e_prop:
-                        logger.warning(f"Could not update Napari shape properties: {e_prop}")
+        if new_shape_indices:
+            last_new_index = -1
+            for shape_index in new_shape_indices:
+                new_vertices = self.shapes_layer.data[shape_index]
+                # Napari vertices for a polygon are (N, D), D=2 for us.
+                # The coordinates are typically (row, column)
+                roi_obj = self.roi_manager.add_roi(new_vertices, shape_index)
+                if roi_obj:
+                    # Update physical area right away if pixel size is set
+                    roi_obj.set_area_physical(self.pixel_size_um)
+                    area_px = roi_obj.area_pixels
+                    area_um = roi_obj.area_sq_um
+                    show_info(f"ROI {roi_obj.id} added (Area: {area_px:.1f} px, {area_um:.2f} µm²).")
+                    last_new_index = shape_index
                 else:
-                    show_warning(f"ROIManager failed to add shape from index {new_shape_idx}. Shape remains in Napari.")
-
-        elif action_str == 'removed': # Napari often uses 'removed' or 'remove'
-            removed_indices = getattr(event, 'data_indices', tuple())
-            logger.info(f"Napari shapes removed at indices: {removed_indices}. ROIManager not auto-updated in this version.")
-            # Implement removal from self.roi_manager if you have a robust way to map napari indices/IDs to your ROI IDs
-
-        elif action_str == 'changed': # Napari often uses 'changed' or 'changing'
-            changed_indices = getattr(event, 'data_indices', tuple())
-            logger.info(f"Napari shapes changed at indices: {changed_indices}. ROIManager not auto-updated in this version.")
-            # Implement update logic in self.roi_manager (e.g., re-calculate area, intensity trace if vertices changed)
-
+                    show_error(f"Failed to create internal ROI for shape index {shape_index}.")
+            
+            if last_new_index != -1:
+                self.shapes_layer.selected_data = {last_new_index}
+                logger.info(f"Automatically selected new ROI (Shape index: {last_new_index}).")
+        
+        # Here you could also handle ROI modification or deletion by comparing
+        # the current shapes_layer.data with your ROIManager's state.
+        # For this example, we focus on adding new ROIs.
+        # For instance, to detect deletions:
+        deleted_indices = known_roi_indices - all_shape_indices
+        if deleted_indices:
+            # This logic needs to be more robust, as indices can change upon deletion
+            # A better approach is to map ROI IDs to shape indices and manage them carefully
+            # For now, this part is left as a comment. A full sync is more complex.
+            logger.warning(f"Deletion detected, but not handled yet. Indices: {deleted_indices}")
 
     def _toggle_roi_drawing_mode(self):
         if not self.shapes_layer:

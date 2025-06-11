@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class ROI:
     """Represents a Region of Interest."""
-    def __init__(self, id: int, vertices: np.ndarray, image_shape: Tuple[int, int, int]):
+    def __init__(self, id: int, vertices: np.ndarray, image_shape: Tuple[int, int, int], shape_index: int):
         """
         Args:
             id (int): Unique identifier for the ROI.
@@ -15,9 +15,11 @@ class ROI:
                                    For Napari Shapes layer, data is typically (N, D)
                                    where D=2 for 2D shapes, and coordinates are (row, column).
             image_shape (Tuple[int, int, int]): Shape of the image stack (T, H, W).
+            shape_index (int): The index of the shape in the napari Shapes layer.
         """
         self.id = id
         self.vertices = np.array(vertices) # Ensure it's a NumPy array
+        self.shape_index = shape_index
         self.image_height = image_shape[1]
         self.image_width = image_shape[2]
         self.mask: Optional[np.ndarray] = None # (H, W) mask
@@ -133,12 +135,12 @@ class ROIManager:
         self.next_roi_id = 1
         self.image_shape_thw = image_shape_thw # T, H, W
 
-    def add_roi(self, vertices: np.ndarray) -> Optional[ROI]:
+    def add_roi(self, vertices: np.ndarray, shape_index: int) -> Optional[ROI]:
         try:
-            roi = ROI(self.next_roi_id, vertices, self.image_shape_thw)
+            roi = ROI(self.next_roi_id, vertices, self.image_shape_thw, shape_index)
             self.rois[self.next_roi_id] = roi
             self.next_roi_id += 1
-            logger.info(f"Added ROI {roi.id} with {len(vertices)} vertices.")
+            logger.info(f"Added ROI {roi.id} (Shape index: {shape_index}) with {len(vertices)} vertices.")
             return roi
         except ValueError as ve:
             logger.error(f"Failed to add ROI: {ve}")
@@ -147,6 +149,12 @@ class ROIManager:
             logger.error(f"Unexpected error adding ROI: {e}")
             return None
 
+    def get_roi_by_shape_index(self, shape_index: int) -> Optional[ROI]:
+        """Finds an ROI by its corresponding napari shape index."""
+        for roi in self.rois.values():
+            if roi.shape_index == shape_index:
+                return roi
+        return None
 
     def get_roi(self, roi_id: int) -> Optional[ROI]:
         return self.rois.get(roi_id)

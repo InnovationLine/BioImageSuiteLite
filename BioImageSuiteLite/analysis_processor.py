@@ -1,6 +1,6 @@
 # BioImageSuiteLite/analysis_processor.py
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, peak_widths
 from scipy.ndimage import gaussian_filter1d
 from skimage.filters import threshold_otsu
 from typing import List, Dict, Any, Optional, Tuple
@@ -183,6 +183,73 @@ def detect_events_dog(
         events.append(evt)
     logger.info(f"ROI {roi_id}: DoG detection found {len(events)} events (peaks).")
     return events
+
+
+def estimate_dog_params_from_trace(
+    intensity_trace: np.ndarray,
+) -> Optional[Tuple[float, float, float]]:
+    """
+    Estimates optimal DoG parameters from an intensity trace by finding the most prominent peak.
+
+    Args:
+        intensity_trace (np.ndarray): 1D array of intensity values over time.
+
+    Returns:
+        Optional[Tuple[float, float, float]]: A tuple containing (sigma1, sigma2, min_prominence).
+                                              Returns None if no peaks are found.
+    """
+    if intensity_trace is None or len(intensity_trace) < 10: # Need some data
+        logger.warning("Intensity trace is too short for parameter estimation.")
+        return None
+
+    # Find all peaks and their prominences
+    try:
+        # We find peaks in the raw trace to estimate parameters for the DoG filter
+        # Use a minimal prominence to avoid noise, e.g., >1% of the signal range
+        min_prom = (np.max(intensity_trace) - np.min(intensity_trace)) * 0.01
+        peaks, properties = find_peaks(intensity_trace, prominence=(min_prom, None))
+
+        if len(peaks) == 0:
+            logger.warning("No significant peaks found in the trace, cannot estimate DoG parameters.")
+            return None
+
+        # Find the most prominent peak
+        prominences = properties['prominences']
+        most_prominent_idx = np.argmax(prominences)
+        best_peak_idx = peaks[most_prominent_idx]
+        max_prominence = prominences[most_prominent_idx]
+
+        # Calculate the width of the most prominent peak to estimate sigma
+        # The width is calculated at half the prominence of the peak
+        widths, _, _, _ = peak_widths(intensity_trace, [best_peak_idx], rel_height=0.5)
+        
+        if len(widths) == 0 or widths[0] == 0:
+            logger.warning("Could not determine peak width. Using default sigma.")
+            # Fallback if width is zero, maybe a single-point spike
+            est_sigma1 = 1.0 
+        else:
+            # Heuristic: sigma is related to the full-width at half-maximum (FWHM)
+            # For a Gaussian, FWHM = 2 * sqrt(2*ln(2)) * sigma ~= 2.355 * sigma
+            # So, sigma ~= FWHM / 2.355
+            est_sigma1 = max(0.5, widths[0] / 2.355) # Ensure sigma is not too small
+
+        # Set sigma2 based on the recommended ratio
+        est_sigma2 = est_sigma1 * 1.6
+
+        # Set min_prominence based on the most prominent peak found
+        # A good starting point is a fraction of this max prominence.
+        # This is for the DoG signal, not the raw trace, but it's a good heuristic.
+        # The DoG signal's prominence will be related to the raw signal's prominence.
+        # Let's use 1/4th of the raw prominence as a starting point for DoG prominence
+        est_min_prominence = max_prominence / 4.0
+        
+        logger.info(f"Estimated DoG params: sigma1={est_sigma1:.2f}, sigma2={est_sigma2:.2f}, prominence={est_min_prominence:.2f}")
+
+        return (est_sigma1, est_sigma2, est_min_prominence)
+
+    except Exception as e:
+        logger.error(f"Error during DoG parameter estimation: {e}")
+        return None
 
 
 def detect_events_scisson_like_stub(
