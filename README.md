@@ -132,3 +132,25 @@ graph TD
 * Application logic modules use external libraries to perform their tasks.
 * Data (like images, ROIs, analysis results) flows between these components.
 * The logging system collects messages from various parts and, via your custom handler, displays them in the GUI.
+
+**Auto set DOG value**
+
+calculate the average intensity trace from all the ROIs selected. The parameter estimation would then run on this single, averaged trace, giving a set of parameters that is representative of all the selected regions.
+
+
+
+
+
+### Abstract
+
+Title: BioImageSuiteLite: An Interactive Open-Source Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy
+
+Author(s): [Your Name/Lab]
+
+Body:
+
+The quantitative analysis of dynamic, transient events from time-lapse microscopy, such as neurotransmitter release or vesicle exocytosis, is fundamental to understanding cellular communication. However, these analyses are often hampered by low signal-to-noise ratios and the challenge of establishing objective, reproducible detection criteria. Existing tools may require significant programming expertise, costly licenses, or rely on manual, iterative parameter tuning, which can be both time-consuming and subjective.
+
+To address these challenges, we present BioImageSuiteLite, a novel, open-source software tool built on Python and the napari interactive viewer. BioImageSuiteLite provides a seamless and unified workflow, guiding the researcher from raw video import to final quantitative analysis within a single, intuitive graphical interface. The platform's key innovation is a semi-automated, data-driven approach to parameterizing event detection. Users can interactively define regions of interest (ROIs), and the software automatically analyzes the signal properties within these selections to propose optimal parameters for advanced detection algorithms, such as the Difference of Gaussians (DoG) filter. When multiple ROIs are selected, their signal characteristics are intelligently averaged to derive a globally representative parameter set.
+
+This interactive-feedback loop dramatically accelerates the analysis process and enhances objectivity, moving beyond the trial-and-error methods common in traditional image analysis workflows. By providing a user-friendly, extensible, and cost-effective solution, BioImageSuiteLite lowers the barrier to sophisticated, quantitative imaging and empowers researchers to perform rapid and robust analysis of transient biological phenomena with high confidence and reproducibility.
