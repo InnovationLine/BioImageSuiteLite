@@ -15,12 +15,6 @@ python -m BioImageSuiteLite.gui_manager
 python -m: This tells Python to load a module as a script.
 BioImageSuiteLite.gui_manager: This is the path to your gui_manager.py file, treating BioImageSuiteLite as a package.
 
-
-you can confirm the file fps and image with the following command 
-
-$ ffmpeg -i input/vvs4_2.avi
-
-
 you can confirm the file fps and image with the following command 
 
 $ ffmpeg -i input/vvs4_2.avi
@@ -35,33 +29,6 @@ code .
 
 in the vs code terminal paste and enter the following to start your app
    python -m BioImageSuiteLite.gui_manager
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # BioImageSuiteLite/examples/basic_workflow.ipynb
 # This would be a Jupyter Notebook. Here's the conceptual Python code:

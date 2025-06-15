@@ -1,0 +1,64 @@
+import cv2
+import tifffile as tiff
+
+avi_path   = "input/vvs4_2.avi"
+tiff_path  = "input/vvs4_2.tiff"
+
+cap = cv2.VideoCapture(avi_path)
+if not cap.isOpened():
+    raise IOError(f"Cannot open {avi_path}")
+
+with tiff.TiffWriter(tiff_path, bigtiff=True) as tif:
+    frame_idx = 0
+    while True:
+        ok, frame_bgr = cap.read()
+        if not ok:          # no more frames
+            break
+
+        # Convert BGR (OpenCV default) ➜ RGB so the colors look right
+        frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+
+        # Write this frame as the next page in the TIFF
+        tif.write(
+            frame_rgb,
+            photometric="rgb",       # tell TIFF it’s RGB data
+            compression="jpeg",      # or "lzma", "lzw", "zlib", None…
+            metadata=None            # omit huge XML blocks from OpenCV
+        )
+        frame_idx += 1
+
+print(f"✔ Saved {frame_idx} frames to {tiff_path}")
+cap.release()
+
+
+
+
+import tifffile as tiff
+
+import numpy as np
+
+stack = tiff.imread('input/vvs4_2.tiff')
+print(f"Original shape of the non treated tiff file is {stack.shape}")
+
+output :- import tifffile as tiff
+
+import numpy as np
+
+stack = tiff.imread('input/vvs4_2.tiff')
+print(f"Original shape of the non treated tiff file is {stack.shape}")
+
+
+import tifffile as tiff
+import numpy as np
+
+# Load the raw RGB stack
+raw_stack = stack  # Original shape of tiff (300, 150, 150, 3)
+
+# Extract only green channel (channel 1 = green in RGB)
+green_stack = raw_stack[:, :, :, 1]  # shape: (300, 150, 150), i.e. this is the grayscale
+
+# Transpose to shape (Height, Width, Time)
+stack_tp = np.transpose(green_stack, (1, 2, 0))  # final shape: (150, 150, 300)
+
+print(f"Processed shape of non treated stack (H, W, T): {stack_tp.shape}")
+output :- Processed shape of non treated stack (H, W, T): (340, 340, 81)
