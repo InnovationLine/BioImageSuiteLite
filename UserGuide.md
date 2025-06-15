@@ -1,10 +1,8 @@
-
-
 ## Step-by-Step Guide for a General User (Using the GUI)
 
 Here's a guide on how a general user would typically use the `BioImageSuiteLite` GUI to analyze an AVI file, assuming all features are implemented and working.
 
-**Objective:** Load an AVI video of cells, define regions of interest (ROIs) around cells, detect cellular events (e.g., fluorescence changes) within these ROIs over time, and get a normalized event rate.
+**Objective:** Load a video file (AVI or multi-page TIFF) of cells, define regions of interest (ROIs) around cells, detect cellular events (e.g., fluorescence changes) within these ROIs over time, and get a normalized event rate.
 
 ---
 
@@ -17,29 +15,22 @@ Here's a guide on how a general user would typically use the `BioImageSuiteLite`
 * Type `bioimagesuitelite` and press Enter.
 * The BioImageSuiteLite window will open, integrated with the Napari viewer. You should see a "BioImageSuiteLite Controls" panel docked, likely on the right.
 
-**Step 2: Load Your AVI File**
+**Step 2: Load Your Video File**
 
-1. In the "BioImageSuiteLite Controls" panel, under the "1. File Operations" section, click the **"Load .avi File"** button.
-2. A file dialog will appear. Navigate to the location of your `.avi` video file, select it, and click "Open".
+1. In the "BioImageSuiteLite Controls" panel, under the "1. File Operations" section, click the **"Load File"** button.
+2. A file dialog will appear. Navigate to the location of your video file (`.avi` or `.tif`/`.tiff`), select it, and click "Open".
 3. **Observe:**
    * The main Napari viewer will display the first frame of your video, converted to greyscale. You can use the slider at the bottom (for the 'T' or time dimension) to scroll through the frames of your video.
    * The "File Info" label in the GUI panel will update with details about your loaded file (name, frame count, FPS, dimensions).
-   * The "Save as Multi-TIFF", "Activate ROI Drawing", "Clear All ROIs", and "Run Full Analysis" buttons should become enabled.
+   * The "Activate ROI Drawing", "Clear All ROIs", and "Run Full Analysis" buttons should become enabled.
 
-**Step 3: (Optional) Save as Multi-Page TIFF**
-
-* If you want a copy of your video converted to a multi-page TIFF stack (useful for other software or archival):
-  1. Click the **"Save as Multi-TIFF"** button.
-  2. A file dialog will appear. Choose a location and name for your TIFF file, then click "Save".
-  3. A notification will confirm if the save was successful.
-
-**Step 4: Set Pixel Size for Physical Unit Calculations**
+**Step 3: Set Pixel Size for Physical Unit Calculations**
 
 1. Under the "2. Preprocessing & ROI" section, find the **"Pixel Size"** input field.
 2. Enter the physical size of one pixel from your microscope's calibration (e.g., if 1 pixel = 0.16 micrometers, enter `0.160`). The unit is µm/pixel.
    * *This step is crucial for the final normalization to events/second/µm².*
 
-**Step 5: Define Regions of Interest (ROIs) Around Cells**
+**Step 4: Define Regions of Interest (ROIs) Around Cells**
 
 1. Ensure your video is on a frame where the cells you want to analyze are clearly visible (use the time slider if needed).
 2. In the "2. Preprocessing & ROI" section, click the **"Activate ROI Drawing"** button.
@@ -58,14 +49,14 @@ Here's a guide on how a general user would typically use the `BioImageSuiteLite`
 5. **When Done Drawing All ROIs:** Click the **"Finish ROI Drawing"** (or similarly named) button again. This will typically switch the shapes layer mode to "select" or "pan/zoom," so you don't accidentally draw more ROIs.
    * *Note: The GUI should provide feedback on the number of ROIs drawn or their IDs.*
 
-**Step 6: (Optional) Manage ROIs**
+**Step 5: (Optional) Manage ROIs**
 
 * **Selecting an ROI:** If the shapes layer is in "select" mode, you should be able to click on an existing ROI outline to select it.
 * **Modifying an ROI:** Once selected, you might be able to drag its vertices to adjust the shape.
 * **Deleting an ROI:** There might be a "Delete Selected ROI" button, or you might select an ROI and press the `Delete` key (this depends on how Napari's shapes layer interaction is configured).
 * **Clear All ROIs:** If you want to start over, click the **"Clear All ROIs"** button. This will remove all drawn ROIs.
 
-**Step 7: Set Analysis Parameters**
+**Step 6: Set Analysis Parameters**
 
 1. Navigate to the "3. Analysis Parameters" section in the GUI panel.
 2. For each detection method you want to use, check the corresponding **"Enable..."** checkbox:
@@ -80,13 +71,13 @@ Here's a guide on how a general user would typically use the `BioImageSuiteLite`
 3. **Post-processing:**
    * Set the **"Min Event Separation"** (in seconds). This helps filter out duplicate detections of the same biological event that might occur very close in time.
 
-**Step 8: Run the Analysis**
+**Step 7: Run the Analysis**
 
 1. Once all parameters are set and ROIs are defined, click the large green **"Run Full Analysis"** button (likely at the bottom of the controls panel).
 2. **Wait:** The analysis will now run on each ROI using the selected methods. This might take some time depending on the video size, number of ROIs, and complexity of the enabled analyses.
    * The "Log" display area should show progress messages and any warnings or errors encountered during the analysis.
 
-**Step 9: Review Results**
+**Step 8: Review Results**
 
 1. After the analysis is complete, a notification will likely appear.
 2. The **"Analysis Results" table** in the GUI panel will be populated. Each row typically represents a detected event:
@@ -100,10 +91,10 @@ Here's a guide on how a general user would typically use the `BioImageSuiteLite`
    * The **"Events/s/µm²"** column is the key quantitative output, allowing comparison across different cells or conditions.
    * You might see events from different detection methods. The "Min Event Separation" helps consolidate these if they refer to the same underlying biological event.
 
-**Step 10: (Future/Optional) Export Results**
+**Step 9: Export Results**
 
-* (This functionality might not be in the initial version but is common)
-* Look for a button like "Export Results Table" or "Save Analysis" to save the data from the results table to a file (e.g., CSV or Excel) for further statistical analysis or plotting in other software.
+* Click the **"Export Results to CSV"** button to save the data from the results table to a CSV file for further statistical analysis or plotting in other software.
+* Choose a location and filename for your results file.
 
 **Troubleshooting/Tips for the User:**
 
@@ -111,5 +102,3 @@ Here's a guide on how a general user would typically use the `BioImageSuiteLite`
 * **Parameter Tuning:** Event detection is highly dependent on parameters. You will likely need to experiment with different threshold values, DoG sigmas/prominence, and Scisson penalties to get meaningful results for  *your specific data* . Analyze a small, representative dataset first to optimize parameters.
 * **Start Simple:** Try one detection method at a time to understand its behavior before enabling all of them.
 * **ROI Quality:** Draw ROIs carefully to accurately delineate your cells. The area of the ROI directly affects the normalized event rate.
-
-This step-by-step guide should help a user navigate the GUI and perform the intended analysis. As you develop, ensure the GUI provides clear feedback at each stage!

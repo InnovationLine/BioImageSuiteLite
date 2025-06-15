@@ -35,3 +35,10 @@ htmlcov/
 bio_venv/
 input/
 test.py
+
+examples/*.csv
+examples/*.avi
+examples/*.tif
+examples/*.csv
+
+image/

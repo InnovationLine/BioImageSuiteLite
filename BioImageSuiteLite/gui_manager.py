@@ -5,11 +5,12 @@ from napari.utils.notifications import show_info, show_error, show_warning
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel,
                             QSpinBox, QDoubleSpinBox, QGroupBox, QFormLayout,
                             QCheckBox, QLineEdit, QScrollArea, QTableWidget, QTableWidgetItem,
-                            QHeaderView, QSplitter, QTextEdit, QDialog)
+                            QHeaderView, QSplitter, QTextEdit, QDialog, QHBoxLayout)
 from qtpy.QtCore import Qt
 import numpy as np
 from napari.layers.shapes.shapes import Mode as NapariShapesMode
 import logging
+from datetime import datetime
 
 # Matplotlib imports for plotting
 from matplotlib.figure import Figure
@@ -40,6 +41,7 @@ class BioImageSuiteLiteGUI:
         self.pixel_size_um: float = 1.0 # Default, user should set this
         self.all_detected_events: List[analysis_processor.Event] = []
         self.roi_summary_stats: Dict[Any, Dict[str, float]] = {} # For storing rate and SE per ROI
+        self.analysis_timestamp: Optional[datetime] = None
 
 
         # --- Main Widget ---
@@ -60,16 +62,17 @@ class BioImageSuiteLiteGUI:
         # == File Operations Group ==
         file_group = QGroupBox("1. File Operations")
         file_layout = QFormLayout(file_group)
-        self.btn_load_avi = QPushButton("Load .avi File")
+        self.btn_load_avi = QPushButton("Load File")
+        self.btn_load_avi.setToolTip("Load video file (supports .avi and .tif/.tiff formats)")
         self.btn_load_avi.clicked.connect(self._load_avi_action)
         self.lbl_file_info = QLabel("No file loaded.")
         self.lbl_file_info.setWordWrap(True)
-        self.btn_save_tiff = QPushButton("Save as Multi-TIFF")
-        self.btn_save_tiff.clicked.connect(self._save_tiff_action)
-        self.btn_save_tiff.setEnabled(False)
+        self.btn_export_rois = QPushButton("Export ROIs to CSV")
+        self.btn_export_rois.clicked.connect(self._export_rois_action)
+        self.btn_export_rois.setEnabled(False)
         file_layout.addRow(self.btn_load_avi)
         file_layout.addRow(self.lbl_file_info)
-        file_layout.addRow(self.btn_save_tiff)
+        file_layout.addRow(self.btn_export_rois)
         controls_layout.addWidget(file_group)
 
         # == Preprocessing Group ==
@@ -158,7 +161,15 @@ class BioImageSuiteLiteGUI:
         self.btn_run_analysis.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; padding: 6px; }")
         self.btn_run_analysis.clicked.connect(self._run_full_analysis)
         self.btn_run_analysis.setEnabled(False)
-        controls_layout.addWidget(self.btn_run_analysis)
+
+        self.btn_export_results = QPushButton("Export Results to CSV")
+        self.btn_export_results.clicked.connect(self._export_results_action)
+        self.btn_export_results.setEnabled(False)
+
+        analysis_run_layout = QHBoxLayout()
+        analysis_run_layout.addWidget(self.btn_run_analysis)
+        analysis_run_layout.addWidget(self.btn_export_results)
+        controls_layout.addLayout(analysis_run_layout)
 
         self.btn_show_summary_plot = QPushButton("Show Summary Plot")
         self.btn_show_summary_plot.clicked.connect(self._show_summary_plot_action)
@@ -278,11 +289,16 @@ class BioImageSuiteLiteGUI:
                          "No significant peaks found in the intensity trace.")
 
     def _load_avi_action(self):
-        file_path, _ = QFileDialog.getOpenFileName(self.main_widget, "Open AVI File", "", "AVI Files (*.avi)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self.main_widget, 
+            "Open Video File", 
+            "", 
+            "Video Files (*.avi *.tif *.tiff);;AVI Files (*.avi);;TIFF Files (*.tif *.tiff);;All Files (*.*)"
+        )
         if not file_path:
             return
 
-        self.raw_frames, self.metadata = io_operations.load_avi(file_path)
+        self.raw_frames, self.metadata = io_operations.load_file(file_path)
 
         if self.raw_frames and self.metadata:
             self.lbl_file_info.setText(
@@ -295,10 +311,10 @@ class BioImageSuiteLiteGUI:
             # Convert to greyscale immediately for display and analysis
             self.greyscale_stack = io_operations.convert_to_greyscale_stack(self.raw_frames)
             if self.greyscale_stack is None:
-                show_error("Failed to convert AVI to greyscale stack.")
-                self.btn_save_tiff.setEnabled(False)
+                show_error("Failed to convert video to greyscale stack.")
                 self.btn_add_roi_mode.setEnabled(False)
                 self.btn_run_analysis.setEnabled(False)
+                self.btn_export_rois.setEnabled(False)
                 return
 
             # Clear previous layers
@@ -319,32 +335,34 @@ class BioImageSuiteLiteGUI:
             self.roi_manager = roi_handler.ROIManager(self.greyscale_stack.shape)
             self._setup_shapes_layer()
 
-            self.btn_save_tiff.setEnabled(True)
             self.btn_add_roi_mode.setEnabled(True)
             self.btn_clear_rois.setEnabled(True)
-            self.btn_run_analysis.setEnabled(True) # Enable once image is loaded
-            show_info("AVI loaded and converted to greyscale.")
+            self.btn_run_analysis.setEnabled(True)
+            self.btn_export_rois.setEnabled(False)
+            show_info("File loaded and converted to greyscale.")
         else:
-            show_error(f"Failed to load AVI: {file_path}")
-            self.lbl_file_info.setText("Failed to load AVI.")
-            self.btn_save_tiff.setEnabled(False)
+            show_error(f"Failed to load file: {file_path}")
+            self.lbl_file_info.setText("Failed to load file.")
             self.btn_add_roi_mode.setEnabled(False)
             self.btn_run_analysis.setEnabled(False)
+            self.btn_export_rois.setEnabled(False)
 
-    def _save_tiff_action(self):
-        if self.greyscale_stack is None:
-            show_warning("No greyscale image data to save.")
+
+
+    def _export_rois_action(self):
+        if self.roi_manager is None or not self.roi_manager.get_all_rois():
+            show_warning("No ROIs available to export.")
             return
 
-        output_path, _ = QFileDialog.getSaveFileName(self.main_widget, "Save Multi-Page TIFF", "", "TIFF Files (*.tif *.tiff)")
+        output_path, _ = QFileDialog.getSaveFileName(self.main_widget, "Export ROIs to CSV", "", "CSV Files (*.csv)")
         if not output_path:
             return
 
-        success = io_operations.save_to_multitiff(self.greyscale_stack, output_path, self.metadata)
+        success = self.roi_manager.export_rois_to_csv(output_path)
         if success:
-            show_info(f"Greyscale stack saved to {output_path}")
+            show_info(f"ROI data exported successfully to {output_path}")
         else:
-            show_error(f"Failed to save TIFF to {output_path}")
+            show_error(f"Failed to export ROI data to {output_path}")
 
     def _setup_shapes_layer(self):
         if self.shapes_layer and self.shapes_layer in self.viewer.layers:
@@ -384,11 +402,15 @@ class BioImageSuiteLiteGUI:
         if not self.roi_manager or not self.shapes_layer:
             return
 
-        # This event fires for any change, so we need to figure out what happened.
-        # The `event` object itself doesn't give us which shape was added,
-        # so we have to look at the full data and sync our state.
-        # A common way is to check for shapes that we don't have an ROI for yet.
-        
+        # Enable the export button if there are ROIs
+        if self.roi_manager.get_all_rois():
+            self.btn_export_rois.setEnabled(True)
+
+        # This event fires for any change, so we need to sync our state.
+        # Check if there are any shapes in the layer.
+        has_rois = len(self.shapes_layer.data) > 0
+        self.btn_export_rois.setEnabled(has_rois)
+
         all_shape_indices = set(range(len(self.shapes_layer.data)))
         known_roi_indices = {roi.shape_index for roi in self.roi_manager.get_all_rois()}
         
@@ -427,30 +449,15 @@ class BioImageSuiteLiteGUI:
             logger.warning(f"Deletion detected, but not handled yet. Indices: {deleted_indices}")
 
     def _toggle_roi_drawing_mode(self):
-        if not self.shapes_layer:
-            self.btn_add_roi_mode.setChecked(False)
-            return
-
         if self.btn_add_roi_mode.isChecked():
-            # Before changing mode, ensure any active drawing is finalized or cancelled.
-            # Napari's _finish_drawing is usually called on double-click or mode change.
-            # If the layer is in an inconsistent state, changing mode can be problematic.
-            # The previous fix to _on_roi_added_or_changed should prevent that state.
-            
-            logger.debug("Activating ROI drawing mode (add_polygon).")
-            self.shapes_layer.mode = NapariShapesMode.ADD_POLYGON
-            self.btn_add_roi_mode.setText("Finish ROI Drawing")            
-            show_info("ROI drawing mode: ON. Draw polygons. Double-click or Esc to finish a polygon.")
-            # Set default properties for the next shape to be drawn (if you want to link)
-            # self.shapes_layer.current_properties = {'internal_id': self.roi_manager.next_roi_id}
+            if self.shapes_layer:
+                self.shapes_layer.mode = 'add_polygon'
+                self.btn_add_roi_mode.setText("Finish ROI Drawing")
+                show_info("ROI drawing mode activated. Click on the image to draw polygons.")
         else:
-            logger.debug("Deactivating ROI drawing mode (select).")
-            # If currently drawing a shape, changing mode will typically finalize or discard it.
-            # Napari handles this by calling _finish_drawing internally.
-            # If _finish_drawing had issues before, this could also show them.            
-            self.shapes_layer.mode = NapariShapesMode.SELECT
-            self.btn_add_roi_mode.setText("Activate ROI Drawing")
-            show_info("ROI drawing mode: OFF. Shapes layer in select mode.")
+            if self.shapes_layer:
+                self.shapes_layer.mode = 'pan_zoom'
+                self.btn_add_roi_mode.setText("Activate ROI Drawing")
 
     def _clear_all_rois(self):
         if self.shapes_layer:
@@ -460,26 +467,30 @@ class BioImageSuiteLiteGUI:
             self.roi_manager.rois = {} # Clear from our manager
             self.roi_manager.next_roi_id = 1
         show_info("All ROIs cleared.")
+        self.btn_export_rois.setEnabled(False) # Also disable export if no ROIs
         if self.btn_add_roi_mode.isChecked(): # If it was in drawing mode
             self._toggle_roi_drawing_mode() # Toggle to turn it off and update text
-
 
     def _run_full_analysis(self):
         if self.greyscale_stack is None or self.roi_manager is None or not self.roi_manager.get_all_rois():
             show_warning("Please load data and define at least one ROI before running analysis.")
             self.btn_show_summary_plot.setEnabled(False) # Ensure plot button is disabled
+            self.btn_export_results.setEnabled(False)
             return
         
         if self.metadata['fps'] <= 0:
             show_error("FPS is zero or invalid. Cannot perform time-based analysis.")
             self.btn_show_summary_plot.setEnabled(False) # Ensure plot button is disabled
+            self.btn_export_results.setEnabled(False)
             return
 
         logger.info("--- Starting Full Analysis ---")
+        self.analysis_timestamp = datetime.now() # Set timestamp for this run
         self.results_table.setRowCount(0) # Clear previous results
         self.all_detected_events = []
         self.roi_summary_stats.clear() # Clear previous summary stats
         self.btn_show_summary_plot.setEnabled(False) # Disable during analysis
+        self.btn_export_results.setEnabled(False) # Disable during analysis
         
         fps = self.metadata['fps']
         total_frames = self.greyscale_stack.shape[0]
@@ -582,10 +593,38 @@ class BioImageSuiteLiteGUI:
         if not self.all_detected_events:
             show_info("Analysis complete. No events found with current settings.")
             self.btn_show_summary_plot.setEnabled(False)
+            self.btn_export_results.setEnabled(False)
         else:
             show_info(f"Analysis complete. Total {len(self.all_detected_events)} unique events found across all ROIs.")
             self.btn_show_summary_plot.setEnabled(True) # Enable if events were found
+            self.btn_export_results.setEnabled(True) # Enable if events were found
         logger.info("--- Full Analysis Finished ---")
+
+    def _export_results_action(self):
+        """Exports the data from the results table to a CSV file."""
+        if self.results_table.rowCount() == 0 or self.analysis_timestamp is None:
+            show_warning("No analysis results available to export. Please run analysis first.")
+            return
+
+        output_path, _ = QFileDialog.getSaveFileName(self.main_widget, "Export Analysis Results", "", "CSV Files (*.csv)")
+        if not output_path:
+            return
+
+        # Prepare headers and data from the QTableWidget
+        headers = [self.results_table.horizontalHeaderItem(i).text() for i in range(self.results_table.columnCount())]
+        table_data = []
+        for row in range(self.results_table.rowCount()):
+            row_data = [self.results_table.item(row, col).text() for col in range(self.results_table.columnCount())]
+            table_data.append(row_data)
+        
+        timestamp_str = self.analysis_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+        success = io_operations.export_results_to_csv(output_path, headers, table_data, timestamp_str)
+
+        if success:
+            show_info(f"Results successfully exported to {output_path}")
+        else:
+            show_error(f"Failed to export results to {output_path}")
 
     def _show_summary_plot_action(self):
         if not self.all_detected_events:

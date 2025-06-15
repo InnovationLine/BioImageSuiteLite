@@ -1,38 +1,115 @@
-# BioImageSuiteLite
+# ioImageSuiteLite
 
-BioImageSuiteLite is a Python-based, open-source graphical user interface (GUI) tool designed for the analysis of cellular events from `.avi` video files.
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/bioimagesuitelite.svg)](https://badge.fury.io/py/bioimagesuitelite)
 
-## Core Features (Planned & In Development)
+**An Interactive Open-Source Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy**
 
-1. **Load .avi file** and display.
-2. Conversion of **.avi to multi-page TIFF**.
-3. Understanding image **shape (H, W, T)** and basic metadata (FPS).
-4. Conversion of **RGB to greyscale**.
-5. GUI for **ROI selection** (manual drawing).
-6. Define ROI and count manually cropped cells per ROI (conceptual - area based).
-7. Reimplementation of **"Scisson-like" analysis** for event detection over 'T'.
-8. Implementation of **wavelet-style (DoG)** and **threshold-based** event detection.
-9. Filtering of duplicate events.
-10. Normalization by cell area: Final Output = **events/second/sq.µM**.
+![1750010543782](image/README/1750010543782.png)
+
+***A screenshot of the main BioImageSuiteLite interface.***
+
+---
+
+## Overview
+
+BioImageSuiteLite is a user-friendly desktop application designed for biologists and researchers to analyze time-lapse microscopy data. It provides an all-in-one workflow for:
+
+* **Loading Data:** Import `.avi` files or multi-page `.tif`/`.tiff` files.
+* **Defining Regions of Interest (ROIs):** Draw ROIs directly on the image to focus analysis on specific areas.
+* **Image Processing:** Apply common bioimage analysis filters like Difference of Gaussians (DoG) for feature enhancement.
+* **Segmentation:** Use automated thresholding methods like Otsu's to identify cells or other objects.
+* **Analysis & Visualization:** Calculate and plot event frequency, intensity changes, and other metrics over time.
+* **Exporting Results:** Save analysis data to `.csv` files.
+
+This tool was built using Python, with a graphical user interface powered by Napari.
 
 ## Installation
 
-### Prerequisites
+There are two ways to install BioImageSuiteLite:
 
-* Python 3.8+
+### 1. Simple Installation (Recommended)
 
-### Setup
-
-It is highly recommended to use a virtual environment:
+Once published, you will be able to install the package directly using pip:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install bioimagesuitelite
 ```
 
-git clone [https://github.com/yourusername/BioImageSuiteLite.git](https://github.com/yourusername/BioImageSuiteLite.git) # Change this
+### 2. From Source
+
+For the latest development version:
+
+```bash
+git clone https://github.com/raju1stnov/BioImageSuiteLite.git
 cd BioImageSuiteLite
 pip install -e .
+```
+
+## Quick Start
+
+1. **Launch the application:**
+   Open your terminal or command prompt and run:
+   ```bash
+   bioimagesuitelite
+   ```
+2. **Load your data:**
+   Use the "Load File" button to open your microscopy data (.avi or .tif/.tiff files).
+3. **Draw an ROI:**
+   Select the "Polygon" tool in the Napari viewer and draw a region around the cells you want to analyze.
+4. **Run Analysis:**
+   Adjust the parameters in the GUI and click the "Run Analysis" button.
+5. **Explore Results:**
+   View the generated plots and save your data using the "Save Data" button.
+
+For a detailed walkthrough, see our [Example Notebook](./examples/usage_demo.ipynb) or the full [User Guide](./UserGuide.md).
+
+## For Developers
+
+### Setting up the Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/raju1stnov/BioImageSuiteLite.git
+cd BioImageSuiteLite
+
+# Create a virtual environment
+python -m venv bio_venv
+source bio_venv/bin/activate  # On Windows use `bio_venv\Scripts\activate`
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Running the GUI from source
+
+To launch the GUI directly from the source code, run:
+
+```bash
+python -m BioImageSuiteLite.gui_manager
+```
+
+## How to Cite
+
+If you use BioImageSuiteLite in your research, please cite it. Once you obtain a DOI from Zenodo, you can add it here, for example:
+
+> Rinki Dasgupta. (2024). BioImageSuiteLite (v0.1.0). Zenodo. https://doi.org/10.5281/zenodo.YOUR_DOI_HERE
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+## Core Features (Planned & In Development)
+
+1. **Load video files** (.avi or multi-page .tif/.tiff) and display.
+2. Understanding image **shape (H, W, T)** and basic metadata (FPS).
+3. Conversion of **RGB to greyscale**.
+4. GUI for **ROI selection** (manual drawing).
+5. Define ROI and count manually cropped cells per ROI (conceptual - area based).
+6. Reimplementation of **"Scisson-like" analysis** for event detection over 'T'.
+7. Implementation of **wavelet-style (DoG)** and **threshold-based** event detection.
+8. Filtering of duplicate events.
+9. Normalization by cell area: Final Output = **events/second/sq.µM**.
 
 ```mermaid
 graph TD
@@ -136,10 +213,6 @@ graph TD
 **Auto set DOG value**
 
 calculate the average intensity trace from all the ROIs selected. The parameter estimation would then run on this single, averaged trace, giving a set of parameters that is representative of all the selected regions.
-
-
-
-
 
 ### Abstract
 

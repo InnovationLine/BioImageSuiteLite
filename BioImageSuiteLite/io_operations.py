@@ -3,6 +3,7 @@ import numpy as np
 import tifffile
 from typing import Tuple, List, Optional, Dict, Any
 import logging
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,84 @@ def load_avi(file_path: str) -> Tuple[Optional[List[np.ndarray]], Optional[Dict[
         return None, None
 
 
+def load_multitiff(file_path: str, fps: float = 30.0) -> Tuple[Optional[List[np.ndarray]], Optional[Dict[str, Any]]]:
+    """
+    Loads a multi-page TIFF file and extracts frames and metadata.
+
+    Args:
+        file_path (str): Path to the TIFF file.
+        fps (float): Frame rate to use if not found in metadata (default: 30.0).
+
+    Returns:
+        Tuple[Optional[List[np.ndarray]], Optional[Dict[str, Any]]]:
+            A list of frames (each as a NumPy array) and a dictionary of metadata.
+            Returns (None, None) if loading fails.
+    """
+    try:
+        # Read the TIFF file
+        with tifffile.TiffFile(file_path) as tif:
+            # Extract frames
+            frames = []
+            for page in tif.pages:
+                frames.append(page.asarray())
+            
+            # Try to extract FPS from ImageJ metadata
+            actual_fps = fps
+            if hasattr(tif, 'imagej_metadata') and tif.imagej_metadata:
+                if 'finterval' in tif.imagej_metadata:
+                    actual_fps = 1.0 / tif.imagej_metadata['finterval']
+                elif 'fps' in tif.imagej_metadata:
+                    actual_fps = tif.imagej_metadata['fps']
+            
+            if not frames:
+                logger.error(f"No frames found in TIFF file: {file_path}")
+                return None, None
+            
+            # Get dimensions from first frame
+            first_frame = frames[0]
+            height, width = first_frame.shape[:2]
+            
+            metadata = {
+                "file_path": file_path,
+                "fps": actual_fps,
+                "frame_count": len(frames),
+                "height": height,
+                "width": width,
+                "original_format": "TIFF"
+            }
+            
+            logger.info(f"Successfully loaded {file_path}. Frames: {len(frames)}, FPS: {actual_fps}, Dimensions: {height}x{width}")
+            return frames, metadata
+            
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while loading TIFF {file_path}: {e}")
+        return None, None
+
+
+def load_file(file_path: str, fps: float = 30.0) -> Tuple[Optional[List[np.ndarray]], Optional[Dict[str, Any]]]:
+    """
+    Loads a video file (AVI or multi-page TIFF) and extracts frames and metadata.
+
+    Args:
+        file_path (str): Path to the file.
+        fps (float): Frame rate to use for TIFF files if not found in metadata (default: 30.0).
+
+    Returns:
+        Tuple[Optional[List[np.ndarray]], Optional[Dict[str, Any]]]:
+            A list of frames (each as a NumPy array) and a dictionary of metadata.
+            Returns (None, None) if loading fails.
+    """
+    file_lower = file_path.lower()
+    
+    if file_lower.endswith('.avi'):
+        return load_avi(file_path)
+    elif file_lower.endswith(('.tif', '.tiff')):
+        return load_multitiff(file_path, fps)
+    else:
+        logger.error(f"Unsupported file format: {file_path}. Only .avi and .tif/.tiff files are supported.")
+        return None, None
+
+
 def convert_to_greyscale_stack(frames: List[np.ndarray]) -> Optional[np.ndarray]:
     """
     Converts a list of BGR frames to a greyscale stack (T, H, W).
@@ -159,4 +238,39 @@ def save_to_multitiff(frames_stack: np.ndarray, output_path: str, metadata: Opti
         return True
     except Exception as e:
         logger.error(f"Error saving TIFF to {output_path}: {e}")
+        return False
+
+def export_results_to_csv(file_path: str, headers: List[str], table_data: List[List[str]], analysis_timestamp: str) -> bool:
+    """
+    Exports analysis results from a table format to a CSV file, prepending a timestamp.
+
+    Args:
+        file_path (str): The path to save the CSV file to.
+        headers (List[str]): The column headers for the CSV.
+        table_data (List[List[str]]): The data from the table, as a list of rows.
+        analysis_timestamp (str): The timestamp of when the analysis was run.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
+    try:
+        with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            
+            # Write a metadata line for the timestamp
+            csv_writer.writerow([f"Analysis Run At: {analysis_timestamp}"])
+            
+            # Write the main header
+            csv_writer.writerow(headers)
+            
+            # Write the data rows
+            csv_writer.writerows(table_data)
+            
+        logger.info(f"Successfully exported analysis results to {file_path}")
+        return True
+    except IOError as e:
+        logger.error(f"Failed to write to CSV file {file_path}: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during results CSV export: {e}")
         return False
