@@ -3,6 +3,7 @@ import numpy as np
 import tifffile
 from typing import Tuple, List, Optional, Dict, Any
 import logging
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -159,4 +160,39 @@ def save_to_multitiff(frames_stack: np.ndarray, output_path: str, metadata: Opti
         return True
     except Exception as e:
         logger.error(f"Error saving TIFF to {output_path}: {e}")
+        return False
+
+def export_results_to_csv(file_path: str, headers: List[str], table_data: List[List[str]], analysis_timestamp: str) -> bool:
+    """
+    Exports analysis results from a table format to a CSV file, prepending a timestamp.
+
+    Args:
+        file_path (str): The path to save the CSV file to.
+        headers (List[str]): The column headers for the CSV.
+        table_data (List[List[str]]): The data from the table, as a list of rows.
+        analysis_timestamp (str): The timestamp of when the analysis was run.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
+    try:
+        with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            
+            # Write a metadata line for the timestamp
+            csv_writer.writerow([f"Analysis Run At: {analysis_timestamp}"])
+            
+            # Write the main header
+            csv_writer.writerow(headers)
+            
+            # Write the data rows
+            csv_writer.writerows(table_data)
+            
+        logger.info(f"Successfully exported analysis results to {file_path}")
+        return True
+    except IOError as e:
+        logger.error(f"Failed to write to CSV file {file_path}: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during results CSV export: {e}")
         return False

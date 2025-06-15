@@ -2,6 +2,8 @@ import numpy as np
 from shapely.geometry import Polygon
 from typing import List, Tuple, Dict, Any, Optional
 import logging
+import csv
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ class ROI:
             shape_index (int): The index of the shape in the napari Shapes layer.
         """
         self.id = id
+        self.creation_time = datetime.now()
         self.vertices = np.array(vertices) # Ensure it's a NumPy array
         self.shape_index = shape_index
         self.image_height = image_shape[1]
@@ -134,6 +137,49 @@ class ROIManager:
         self.rois: Dict[int, ROI] = {}
         self.next_roi_id = 1
         self.image_shape_thw = image_shape_thw # T, H, W
+
+    def export_rois_to_csv(self, file_path: str) -> bool:
+        """
+        Exports the vertex data for all ROIs to a CSV file.
+
+        Args:
+            file_path (str): The path to save the CSV file.
+
+        Returns:
+            bool: True if export was successful, False otherwise.
+        """
+        if not self.rois:
+            logger.warning("No ROIs to export.")
+            return False
+
+        try:
+            with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                # Write header
+                header = ['roi_id', 'creation_timestamp', 'vertex_index', 'axis-0 (y)', 'axis-1 (x)']
+                csv_writer.writerow(header)
+
+                # Write data
+                for roi_id, roi in sorted(self.rois.items()):
+                    timestamp_str = roi.creation_time.strftime("%Y-%m-%d %H:%M:%S")
+                    for vertex_idx, vertex in enumerate(roi.vertices):
+                        row = [
+                            roi.id,
+                            timestamp_str,
+                            vertex_idx,
+                            vertex[0],  # axis-0 (y, row)
+                            vertex[1]   # axis-1 (x, column)
+                        ]
+                        csv_writer.writerow(row)
+            
+            logger.info(f"Successfully exported {len(self.rois)} ROIs to {file_path}")
+            return True
+        except IOError as e:
+            logger.error(f"Failed to write to CSV file {file_path}: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"An unexpected error occurred during CSV export: {e}")
+            return False
 
     def add_roi(self, vertices: np.ndarray, shape_index: int) -> Optional[ROI]:
         try:

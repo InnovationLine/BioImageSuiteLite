@@ -21,6 +21,21 @@ you can confirm the file fps and image with the following command
 $ ffmpeg -i input/vvs4_2.avi
 
 
+you can confirm the file fps and image with the following command 
+
+$ ffmpeg -i input/vvs4_2.avi
+
+
+1. open gitbash
+
+cd c:/rinki/project_work/BioImageSuiteLite
+source ../photons_events_realtime/venv_photon/Scripts/activate
+code .
+
+
+in the vs code terminal paste and enter the following to start your app
+   python -m BioImageSuiteLite.gui_manager
+
 
 
 

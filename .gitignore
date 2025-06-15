@@ -35,3 +35,9 @@ htmlcov/
 bio_venv/
 input/
 test.py
+
+figures.md
+image/
+paperdraft.md
+paperdraft.pdf
+important.txt
