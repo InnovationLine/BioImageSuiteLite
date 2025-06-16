@@ -64,7 +64,13 @@ pip install git+https://github.com/InnovationLine/BioImageSuiteLite.git
 5. **Explore Results:**
    View the generated plots for event traces and intensity profiles. Use the **"Save Data"** button to export your quantitative results to a CSV file.
 
-For a detailed walkthrough, see our [Example Notebook](./examples/comprehensive_analysis_guide.ipynb) or the full [User Guide](./UserGuide.md).
+For a detailed reference, see the full [User Guide](./UserGuide.md).
+
+## Tutorial: An Interactive Guide
+
+For a hands-on tutorial that walks you through a complete analysis workflow—from loading data to exporting results—please see our comprehensive Jupyter Notebook. This is the best place to start to understand the full capabilities of BioImageSuiteLite.
+
+➡️ **[Launch the Interactive Tutorial](./examples/comprehensive_analysis_guide.ipynb)**
 
 ## For Developers
 
