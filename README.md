@@ -30,7 +30,7 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-git clone [https://github.com/yourusername/BioImageSuiteLite.git](https://github.com/yourusername/BioImageSuiteLite.git) # Change this
+git clone https://github.com/InnovationLine/BioImageSuiteLite.git
 cd BioImageSuiteLite
 pip install -e .
 
@@ -220,7 +220,7 @@ If you were to re-analyze the same data with a lower scission penalty, you would
 
 ### 3. Does the Scission Penalty Get Values from DoGs?
 
-This is a great question that gets to the sequence of the analysis. The answer is **indirectly yes, but they are separate steps.** Here’s the typical workflow:
+This is a great question that gets to the sequence of the analysis. The answer is **indirectly yes, but they are separate steps.** Here's the typical workflow:
 
 1. **Step 1: Event Enhancement (DoG Filter)**
    The **Difference of Gaussians (DoG)** filter is applied to the image first. Its job is to find and enhance objects of a specific size. It subtracts a broadly blurred version of the image from a lightly blurred version, making spots of a certain diameter "pop" out as local bright maxima. The DoG filter's main job is to say, **"Here are all the potential locations of events."**
@@ -233,7 +233,7 @@ This is a great question that gets to the sequence of the analysis. The answer i
 
 ---
 
-Certainly! Here’s a detailed analysis of your log, a figure legend for Figure 3, and a thorough discussion of the pros and cons of applying the scission penalty in BioImageSuiteLite.
+Certainly! Here's a detailed analysis of your log, a figure legend for Figure 3, and a thorough discussion of the pros and cons of applying the scission penalty in BioImageSuiteLite.
 
 ---
 
