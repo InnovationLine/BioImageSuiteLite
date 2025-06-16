@@ -7,6 +7,7 @@ name = "BioImageSuiteLite"
 version = "0.1.0"
 authors = [
   { name="Rinki Dasgupta", email="rinkidsgpt@gmail.com" },
+  { name="Kaushik Das", email="kaushik.k.das@gmail.com" },
 ]
 description = "A Python-based GUI tool for cellular event detection from .avi files."
 readme = "README.md"
