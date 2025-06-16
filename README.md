@@ -66,6 +66,23 @@ pip install git+https://github.com/InnovationLine/BioImageSuiteLite.git
 
 For a detailed reference, see the full [User Guide](./UserGuide.md).
 
+## System Requirements
+
+- Python >= 3.8
+- The core dependencies are listed in the `pyproject.toml` file and include:
+  - `numpy`
+  - `scipy`
+  - `opencv-python-headless`
+  - `tifffile`
+  - `scikit-image`
+  - `napari[all]`
+  - `shapely`
+  - `ruptures`
+
+## How to Cite
+
+If you use BioImageSuiteLite in your research, please cite it. Once we have a DOI, we will update this section with the proper citation format.
+
 ## Tutorial: An Interactive Guide
 
 For a hands-on tutorial that walks you through a complete analysis workflow—from loading data to exporting results—please see our comprehensive Jupyter Notebook. This is the best place to start to understand the full capabilities of BioImageSuiteLite.
@@ -104,3 +121,10 @@ For more details on the project structure and architecture, please see our [Arch
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This license permits free use, modification, and distribution of the software, provided the original copyright and license notice are included in any copies.
+
+## Citation
+
+*BioImageSuiteLite* is academic software. If you use it in your research, please cite it as follows:
+
+**[Citation details will be added here once a DOI is generated.]**
