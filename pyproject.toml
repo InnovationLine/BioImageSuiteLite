@@ -9,7 +9,7 @@ authors = [
   { name="Rinki Dasgupta", email="rinkidsgpt@gmail.com" },
   { name="Kaushik Das", email="kaushik.k.das@gmail.com" },
 ]
-description = "A Python-based GUI tool for cellular event detection from .avi files."
+description = "A Python-based GUI tool for cellular event detection from .avi and .tiff files."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -33,8 +33,8 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/raju1stnov/BioImageSuiteLite" 
-"Bug Tracker" = "https://github.com/raju1stnov/BioImageSuiteLite/issues" 
+"Homepage" = "https://github.com/InnovationLine/BioImageSuiteLite" 
+"Bug Tracker" = "https://github.com/InnovationLine/BioImageSuiteLite/issues" 
 
 [project.scripts]
 bioimagesuitelite = "BioImageSuiteLite.gui_manager:main"
