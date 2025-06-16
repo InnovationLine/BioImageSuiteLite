@@ -35,6 +35,7 @@ htmlcov/
 bio_venv/
 input/
 test.py
+test.ipynb
 
 examples/*.csv
 examples/*.avi
