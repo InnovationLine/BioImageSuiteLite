@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "BioImageSuiteLite"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name="Rinki Dasgupta", email="rinkidsgpt@gmail.com" },
   { name="Kaushik Das", email="kaushik.k.das@gmail.com" },
@@ -38,3 +38,6 @@ dependencies = [
 
 [project.scripts]
 bioimagesuitelite = "BioImageSuiteLite.gui_manager:main"
+
+[tool.setuptools]
+packages = ["BioImageSuiteLite"]
