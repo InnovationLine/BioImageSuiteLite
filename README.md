@@ -1,7 +1,7 @@
 # BioImageSuiteLite
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI version](https://badge.fury.io/py/bioimagesuitelite.svg)](https://pypi.org/project/bioimagesuitelite)
+[![PyPI](https://img.shields.io/pypi/v/bioimagesuitelite.svg)](https://pypi.org/project/bioimagesuitelite/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15678844.svg)](https://doi.org/10.5281/zenodo.15678844)
 
 **An Interactive Open-Source Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy**
