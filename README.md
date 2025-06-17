@@ -1,7 +1,8 @@
 # BioImageSuiteLite
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI version](https://badge.fury.io/py/bioimagesuitelite.svg)](https://badge.fury.io/py/bioimagesuitelite)
+[![PyPI version](https://badge.fury.io/py/bioimagesuitelite.svg)](https://pypi.org/project/bioimagesuitelite)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15678844.svg)](https://doi.org/10.5281/zenodo.15678844)
 
 **An Interactive Open-Source Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy**
 
@@ -81,7 +82,7 @@ For a detailed reference, see the full [User Guide](./UserGuide.md).
 
 ## How to Cite
 
-If you use BioImageSuiteLite in your research, please cite it. Once we have a DOI, we will update this section with the proper citation format.
+If you use BioImageSuiteLite in your research, please cite it using the metadata below.
 
 ## Tutorial: An Interactive Guide
 
@@ -127,4 +128,4 @@ This license permits free use, modification, and distribution of the software, p
 
 *BioImageSuiteLite* is academic software. If you use it in your research, please cite it as follows:
 
-**[Citation details will be added here once a DOI is generated.]**
+> Dasgupa, Rinki, & Das, Kaushik. (2025). *BioImageSuiteLite* (Version 0.1.2) \[Software\]. Zenodo. https://doi.org/10.5281/zenodo.15678844
