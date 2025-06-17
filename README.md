@@ -128,4 +128,4 @@ This license permits free use, modification, and distribution of the software, p
 
 *BioImageSuiteLite* is academic software. If you use it in your research, please cite it as follows:
 
-> Dasgupa, Rinki, & Das, Kaushik. (2025). *BioImageSuiteLite* (Version 0.1.2) \[Software\]. Zenodo. https://doi.org/10.5281/zenodo.15678844
+> Dasgupta, Rinki, & Das, Kaushik. (2025). *BioImageSuiteLite* (Version 0.1.2) \[Software\]. Zenodo. https://doi.org/10.5281/zenodo.15678844
