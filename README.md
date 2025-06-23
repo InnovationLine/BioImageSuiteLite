@@ -16,34 +16,33 @@
 
 BioImageSuiteLite is a user-friendly desktop application designed for biologists and researchers to analyze time-lapse microscopy data. It simplifies the entire workflow from data import to results export, enabling rapid, reproducible analysis of cellular events.
 
-The tool provides an intuitive graphical user interface (GUI) built on the powerful [Napari](https://napari.org/) viewer, allowing users to:
+The tool provides an intuitive graphical user interface (GUI) built on the powerful [Napari](https://napari.org/) viewer, allowing users to perform end-to-end analysis of cellular events.
 
-- **Load Data:** Directly import `.avi` files or multi-page `.tif`/`.tiff` stacks.
-- **Define Regions of Interest (ROIs):** Interactively draw multiple ROIs to focus analysis on specific areas.
-- **Process & Segment:** Apply Difference of Gaussians (DoG) filtering for feature enhancement and use Otsu's method for robust, automated segmentation.
-- **Analyze & Visualize:** Automatically calculate and plot event frequency, intensity dynamics, and other key metrics over time.
-- **Export Results:** Save analysis data (e.g., events per second per area) to `.csv` files for further analysis and plotting.
+## Key Features
+
+- **Versatile Data Import:** Load time-lapse microscopy data from both `.avi` video files and multi-page `.tif`/`.tiff` image stacks.
+- **Interactive ROI Drawing:** Easily draw, manage, and analyze multiple Regions of Interest (ROIs) on your data using Napari's intuitive tools.
+- **Advanced Event Detection:** Utilize multiple algorithms for event detection, including:
+  - **Threshold-based:** Simple and effective for clear signals.
+  - **Difference of Gaussians (DoG):** Robustly detects blob-like features and transient intensity peaks.
+  - **Scisson-like (Step Detection):** (In development) For analyzing step-like changes in intensity.
+- **Automated Analysis & Export:** Automatically calculate normalized event rates (events/sec/µm²) and export detailed event data and ROI coordinates to CSV for further analysis.
+- **Integrated Plotting:** Instantly visualize analysis results with built-in plotting for event rates and intensity traces.
 
 ## Installation
 
-We recommend installing BioImageSuiteLite into a dedicated virtual environment.
-
-### 1. Simple Installation (Recommended)
-
-Install the package directly using pip:
+We recommend installing BioImageSuiteLite into a dedicated Python virtual environment.
 
 ```bash
-# It is recommended to create a virtual environment first
+# First, create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
 
-# Install from PyPI
+# Now, install the package from PyPI
 pip install bioimagesuitelite
 ```
 
-### 2. To install the latest development version directly from GitHub:
-
-For the latest development version:
+For the latest development version, you can also install directly from GitHub:
 
 ```bash
 pip install git+https://github.com/InnovationLine/BioImageSuiteLite.git
@@ -88,7 +87,9 @@ If you use BioImageSuiteLite in your research, please cite it using the metadata
 
 For a hands-on tutorial that walks you through a complete analysis workflow—from loading data to exporting results—please see our comprehensive Jupyter Notebook. This is the best place to start to understand the full capabilities of BioImageSuiteLite.
 
-➡️ **[Launch the Interactive Tutorial](./examples/comprehensive_analysis_guide.ipynb)**
+<a href="./examples/comprehensive_analysis_guide.ipynb" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/Launch-Interactive%20Tutorial-blue?style=for-the-badge&logo=jupyter" alt="Launch Interactive Tutorial" />
+</a>
 
 ## For Developers
 
