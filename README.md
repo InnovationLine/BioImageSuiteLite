@@ -52,13 +52,14 @@ pip install git+https://github.com/InnovationLine/BioImageSuiteLite.git
 
 1. **Launch the application:**
    Open your terminal or command prompt (with the virtual environment activated) and run:
+
    ```bash
    bioimagesuitelite
    ```
 2. **Load Data:**
    Click the **"Load File"** button to open your microscopy data (`.avi` or `.tif`/`.tiff`).
-3. **Draw an ROI:**
-   Select the **Polygon tool** from the Napari layer controls (top left) and draw one or more regions around the cells you want to analyze.
+3. **Draw an ROI:**  
+   Select your preferred **ROI drawing mode** (Rectangle, Ellipse, Polygon, or Freehand Path) from the dropdown menu in the "Preprocessing & ROI" section, then draw one or more regions around the cells you want to analyze. The interface now provides helpful tooltips for all controls.
 4. **Run Analysis:**
    Adjust parameters in the GUI dock widget as needed (e.g., Gaussian sigma, thresholding method). Click the **"Run Analysis"** button to start processing.
 5. **Explore Results:**

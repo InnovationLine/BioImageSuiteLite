@@ -1,11 +1,12 @@
 import napari
-# from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any
 from napari.layers import Image as NapariImageLayer, Shapes as NapariShapesLayer
 from napari.utils.notifications import show_info, show_error, show_warning
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel,
                             QSpinBox, QDoubleSpinBox, QGroupBox, QFormLayout,
                             QCheckBox, QLineEdit, QScrollArea, QTableWidget, QTableWidgetItem,
-                            QHeaderView, QSplitter, QTextEdit, QDialog, QHBoxLayout)
+                            QHeaderView, QSplitter, QTextEdit, QDialog, QHBoxLayout, QComboBox,
+                            QApplication)
 from qtpy.QtCore import Qt
 import numpy as np
 from napari.layers.shapes.shapes import Mode as NapariShapesMode
@@ -61,13 +62,17 @@ class BioImageSuiteLiteGUI:
         
         # == File Operations Group ==
         file_group = QGroupBox("1. File Operations")
+        file_group.setToolTip("Load your video data and export region of interest (ROI) definitions.")
         file_layout = QFormLayout(file_group)
         self.btn_load_avi = QPushButton("Load File")
         self.btn_load_avi.setToolTip("Load video file (supports .avi and .tif/.tiff formats)")
+        self.btn_load_avi.setStatusTip("Load video file (supports .avi and .tif/.tiff formats)")
         self.btn_load_avi.clicked.connect(self._load_avi_action)
         self.lbl_file_info = QLabel("No file loaded.")
         self.lbl_file_info.setWordWrap(True)
         self.btn_export_rois = QPushButton("Export ROIs to CSV")
+        self.btn_export_rois.setToolTip("Export the definitions of all drawn ROIs to a CSV file.")
+        self.btn_export_rois.setStatusTip("Export the definitions of all drawn ROIs to a CSV file.")
         self.btn_export_rois.clicked.connect(self._export_rois_action)
         self.btn_export_rois.setEnabled(False)
         file_layout.addRow(self.btn_load_avi)
@@ -77,6 +82,7 @@ class BioImageSuiteLiteGUI:
 
         # == Preprocessing Group ==
         preproc_group = QGroupBox("2. Preprocessing & ROI")
+        preproc_group.setToolTip("Set image scale and manage ROIs for analysis.")
         preproc_layout = QFormLayout(preproc_group)
         self.pixel_size_input = QDoubleSpinBox()
         self.pixel_size_input.setSuffix(" µm/pixel")
@@ -84,21 +90,37 @@ class BioImageSuiteLiteGUI:
         self.pixel_size_input.setMinimum(0.001)
         self.pixel_size_input.setMaximum(100.0)
         self.pixel_size_input.setValue(0.16) # Common example value
+        self.pixel_size_input.setToolTip("Define the physical size of a pixel (microns per pixel). This is critical for normalized measurements.")
+        self.pixel_size_input.setStatusTip("Define the physical size of a pixel (microns per pixel). This is critical for normalized measurements.")
         self.pixel_size_input.valueChanged.connect(self._update_pixel_size)
         preproc_layout.addRow("Pixel Size:", self.pixel_size_input)
         
+        # ROI Drawing Mode Selection
+        self.roi_mode_combo = QComboBox()
+        self.roi_mode_combo.addItems(["Rectangle", "Ellipse", "Polygon", "Path (Freehand)"])
+        self.roi_mode_combo.setCurrentIndex(0)  # Default to Rectangle
+        self.roi_mode_combo.setToolTip("Select the ROI drawing mode")
+        self.roi_mode_combo.setStatusTip("Select the ROI drawing mode")
+        preproc_layout.addRow("ROI Drawing Mode:", self.roi_mode_combo)
+        
         self.btn_add_roi_mode = QPushButton("Activate ROI Drawing")
+        self.btn_add_roi_mode.setToolTip("Toggle this button to start or stop drawing ROIs on the image canvas.")
+        self.btn_add_roi_mode.setStatusTip("Toggle this button to start or stop drawing ROIs on the image canvas.")
         self.btn_add_roi_mode.setCheckable(True)
         self.btn_add_roi_mode.clicked.connect(self._toggle_roi_drawing_mode)
         self.btn_add_roi_mode.setEnabled(False)
         preproc_layout.addRow(self.btn_add_roi_mode)
         
         self.btn_clear_rois = QPushButton("Clear All ROIs")
+        self.btn_clear_rois.setToolTip("Remove all ROIs from the image and the internal manager.")
+        self.btn_clear_rois.setStatusTip("Remove all ROIs from the image and the internal manager.")
         self.btn_clear_rois.clicked.connect(self._clear_all_rois)
         self.btn_clear_rois.setEnabled(False)
         preproc_layout.addRow(self.btn_clear_rois)
 
         self.btn_auto_dog_params = QPushButton("Auto-set Params from ROI")
+        self.btn_auto_dog_params.setToolTip("Automatically estimate optimal DoG filter parameters based on the intensity signal of the selected ROI.")
+        self.btn_auto_dog_params.setStatusTip("Automatically estimate optimal DoG filter parameters based on the intensity signal of the selected ROI.")
         self.btn_auto_dog_params.clicked.connect(self._auto_set_dog_params)
         preproc_layout.addRow(self.btn_auto_dog_params)
 
@@ -106,14 +128,21 @@ class BioImageSuiteLiteGUI:
 
         # == Analysis Parameters Group ==
         analysis_group = QGroupBox("3. Analysis Parameters")
+        analysis_group.setToolTip("Configure the algorithms for detecting events within the ROIs.")
         analysis_form_layout = QFormLayout(analysis_group)
 
         # Thresholding
         self.cb_enable_threshold = QCheckBox("Enable Threshold Detection")
+        self.cb_enable_threshold.setToolTip("Detect events where the signal intensity exceeds a defined value.")
+        self.cb_enable_threshold.setStatusTip("Detect events where the signal intensity exceeds a defined value.")
         self.threshold_value_input = QDoubleSpinBox()
         self.threshold_value_input.setRange(0, 65535) # Assuming up to 16-bit
         self.threshold_value_input.setValue(100)
+        self.threshold_value_input.setToolTip("Set the minimum intensity value to be considered an event.")
+        self.threshold_value_input.setStatusTip("Set the minimum intensity value to be considered an event.")
         self.cb_use_otsu = QCheckBox("Use Otsu")
+        self.cb_use_otsu.setToolTip("Automatically determine the threshold value using Otsu's method, which is ideal for bimodal intensity distributions.")
+        self.cb_use_otsu.setStatusTip("Automatically determine the threshold value using Otsu's method, which is ideal for bimodal intensity distributions.")
         self.cb_use_otsu.stateChanged.connect(lambda state: self.threshold_value_input.setEnabled(not state))
         analysis_form_layout.addRow(self.cb_enable_threshold)
         analysis_form_layout.addRow("Threshold Value:", self.threshold_value_input)
@@ -121,18 +150,25 @@ class BioImageSuiteLiteGUI:
 
         # DoG
         self.cb_enable_dog = QCheckBox("Enable DoG Detection")
+        self.cb_enable_dog.setToolTip("Detect events using the Difference of Gaussians (DoG) filter, effective for finding blob-like structures.")
+        self.cb_enable_dog.setStatusTip("Detect events using the Difference of Gaussians (DoG) filter, effective for finding blob-like structures.")
         self.dog_sigma1_input = QDoubleSpinBox()
         self.dog_sigma1_input.setRange(0.1, 100.0)
         self.dog_sigma1_input.setValue(1.0)
         self.dog_sigma1_input.setSingleStep(0.1)
+        self.dog_sigma1_input.setToolTip("The standard deviation of the smaller Gaussian kernel. Defines the size of the feature core.")
+        self.dog_sigma1_input.setStatusTip("The standard deviation of the smaller Gaussian kernel. Defines the size of the feature core.")
         self.dog_sigma2_input = QDoubleSpinBox()
         self.dog_sigma2_input.setRange(0.2, 100.0)
         self.dog_sigma2_input.setValue(2.0)
         self.dog_sigma2_input.setSingleStep(0.1)
+        self.dog_sigma2_input.setToolTip("The standard deviation of the larger Gaussian kernel. Defines the size of the feature surround.")
+        self.dog_sigma2_input.setStatusTip("The standard deviation of the larger Gaussian kernel. Defines the size of the feature surround.")
         self.dog_prominence_input = QDoubleSpinBox()
         self.dog_prominence_input.setRange(0.0, 1000.0)
         self.dog_prominence_input.setValue(5.0) # Needs tuning
         self.dog_prominence_input.setToolTip("Min prominence for DoG peaks. Set to 0 to use dynamic threshold.")
+        self.dog_prominence_input.setStatusTip("Min prominence for DoG peaks. Set to 0 to use dynamic threshold.")
         analysis_form_layout.addRow(self.cb_enable_dog)
         analysis_form_layout.addRow("DoG Sigma 1:", self.dog_sigma1_input)
         analysis_form_layout.addRow("DoG Sigma 2:", self.dog_sigma2_input)
@@ -140,15 +176,20 @@ class BioImageSuiteLiteGUI:
 
         # Scisson-like (Stub)
         self.cb_enable_scisson = QCheckBox("Enable Scisson-like (Stub)")
+        self.cb_enable_scisson.setToolTip("Detect events using a change-point detection algorithm like Pelt. (Currently a placeholder).")
+        self.cb_enable_scisson.setStatusTip("Detect events using a change-point detection algorithm like Pelt. (Currently a placeholder).")
         self.scisson_penalty_input = QDoubleSpinBox() # Example param
         self.scisson_penalty_input.setRange(0.1, 10000.0)
         self.scisson_penalty_input.setValue(10.0) # Needs heavy tuning
         self.scisson_penalty_input.setToolTip("Penalty for Scisson-like (e.g., Pelt). Highly sensitive.")
+        self.scisson_penalty_input.setStatusTip("Penalty for Scisson-like (e.g., Pelt). Highly sensitive.")
         analysis_form_layout.addRow(self.cb_enable_scisson)
         analysis_form_layout.addRow("Scisson Penalty (approx):", self.scisson_penalty_input)
 
         # Post-processing
         self.min_event_separation_input = QDoubleSpinBox()
+        self.min_event_separation_input.setToolTip("The minimum time (in seconds) between two distinct events to avoid double-counting.")
+        self.min_event_separation_input.setStatusTip("The minimum time (in seconds) between two distinct events to avoid double-counting.")
         self.min_event_separation_input.setSuffix(" s")
         self.min_event_separation_input.setRange(0.0, 60.0)
         self.min_event_separation_input.setValue(0.5)
@@ -158,11 +199,15 @@ class BioImageSuiteLiteGUI:
 
         # == Run Analysis Button ==
         self.btn_run_analysis = QPushButton("Run Full Analysis")
+        self.btn_run_analysis.setToolTip("Execute the full analysis pipeline on all ROIs using the selected parameters.")
+        self.btn_run_analysis.setStatusTip("Execute the full analysis pipeline on all ROIs using the selected parameters.")
         self.btn_run_analysis.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; padding: 6px; }")
         self.btn_run_analysis.clicked.connect(self._run_full_analysis)
         self.btn_run_analysis.setEnabled(False)
 
         self.btn_export_results = QPushButton("Export Results to CSV")
+        self.btn_export_results.setToolTip("Save the detailed analysis results from the table below to a CSV file.")
+        self.btn_export_results.setStatusTip("Save the detailed analysis results from the table below to a CSV file.")
         self.btn_export_results.clicked.connect(self._export_results_action)
         self.btn_export_results.setEnabled(False)
 
@@ -172,6 +217,8 @@ class BioImageSuiteLiteGUI:
         controls_layout.addLayout(analysis_run_layout)
 
         self.btn_show_summary_plot = QPushButton("Show Summary Plot")
+        self.btn_show_summary_plot.setToolTip("Generate and display a bar chart summarizing the event rates for each ROI.")
+        self.btn_show_summary_plot.setStatusTip("Generate and display a bar chart summarizing the event rates for each ROI.")
         self.btn_show_summary_plot.clicked.connect(self._show_summary_plot_action)
         self.btn_show_summary_plot.setEnabled(False) # Disabled until analysis results are available
         controls_layout.addWidget(self.btn_show_summary_plot)
@@ -212,6 +259,20 @@ class BioImageSuiteLiteGUI:
 
         self.main_layout.addWidget(splitter)
         self.viewer.window.add_dock_widget(self.main_widget, name="BioImageSuiteLite Controls", area='right')
+        
+        # Enable tooltips and set display duration
+        from qtpy.QtWidgets import QToolTip
+        from qtpy.QtGui import QFont
+        QToolTip.setFont(QFont('Arial', 10))
+        # Set tooltip show delay to 500ms (default is often 700ms)
+        self.main_widget.setStyleSheet("""
+            QToolTip {
+                background-color: #ffffcc;
+                color: black;
+                border: 1px solid black;
+                padding: 2px;
+            }
+        """)
         
         self._update_pixel_size() # Initialize pixel size
 
@@ -373,9 +434,22 @@ class BioImageSuiteLiteGUI:
             ndim=self.greyscale_stack.ndim -1, # ROIs are 2D on each T-slice
             face_color='transparent',
             edge_color='red',
-            edge_width=2
+            edge_width=2,
+            text={'string': '{roi_id}', 'anchor': 'center', 'size': 12, 'color': 'yellow'}
         )
-        self.shapes_layer.mode = 'add_polygon' # Default mode
+        # Set initial mode based on dropdown selection
+        mode_text = self.roi_mode_combo.currentText() if hasattr(self, 'roi_mode_combo') else "Rectangle"
+        if mode_text == "Rectangle":
+            self.shapes_layer.mode = 'add_rectangle'
+        elif mode_text == "Ellipse":
+            self.shapes_layer.mode = 'add_ellipse'
+        elif mode_text == "Polygon":
+            self.shapes_layer.mode = 'add_polygon'
+        elif mode_text == "Path (Freehand)":
+            self.shapes_layer.mode = 'add_path'
+        else:
+            self.shapes_layer.mode = 'add_rectangle'  # Fallback
+            
         # Connect event for when new shape is drawn
         self.shapes_layer.events.data.connect(self._on_roi_added_or_changed)
         self.shapes_layer.mouse_drag_callbacks.append(self._on_roi_interaction)
@@ -433,6 +507,16 @@ class BioImageSuiteLiteGUI:
                 else:
                     show_error(f"Failed to create internal ROI for shape index {shape_index}.")
             
+            # Update text properties to show ROI IDs
+            text_properties = []
+            for i in range(len(self.shapes_layer.data)):
+                roi_obj = self.roi_manager.get_roi_by_shape_index(i)
+                if roi_obj:
+                    text_properties.append({'roi_id': str(roi_obj.id)})
+                else:
+                    text_properties.append({'roi_id': ''})
+            self.shapes_layer.properties = {'roi_id': [tp['roi_id'] for tp in text_properties]}
+            
             if last_new_index != -1:
                 self.shapes_layer.selected_data = {last_new_index}
                 logger.info(f"Automatically selected new ROI (Shape index: {last_new_index}).")
@@ -451,9 +535,26 @@ class BioImageSuiteLiteGUI:
     def _toggle_roi_drawing_mode(self):
         if self.btn_add_roi_mode.isChecked():
             if self.shapes_layer:
-                self.shapes_layer.mode = 'add_polygon'
+                # Get the selected drawing mode
+                mode_text = self.roi_mode_combo.currentText()
+                if mode_text == "Rectangle":
+                    self.shapes_layer.mode = 'add_rectangle'
+                    instruction = "Click and drag on the image to draw rectangles."
+                elif mode_text == "Ellipse":
+                    self.shapes_layer.mode = 'add_ellipse'
+                    instruction = "Click and drag on the image to draw ellipses."
+                elif mode_text == "Polygon":
+                    self.shapes_layer.mode = 'add_polygon'
+                    instruction = "Click multiple points to draw polygons. Double-click to finish."
+                elif mode_text == "Path (Freehand)":
+                    self.shapes_layer.mode = 'add_path'
+                    instruction = "Click and drag to draw freehand paths."
+                else:
+                    self.shapes_layer.mode = 'add_rectangle'  # Fallback
+                    instruction = "Click and drag on the image to draw shapes."
+                
                 self.btn_add_roi_mode.setText("Finish ROI Drawing")
-                show_info("ROI drawing mode activated. Click on the image to draw polygons.")
+                show_info(f"ROI drawing mode activated. {instruction}")
         else:
             if self.shapes_layer:
                 self.shapes_layer.mode = 'pan_zoom'
