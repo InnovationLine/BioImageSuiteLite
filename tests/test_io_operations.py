@@ -1,8 +1,8 @@
-# BioImageSuiteLite/tests/test_io_operations.py
+# TransiScope/tests/test_io_operations.py
 import unittest
 import os
 import numpy as np
-from BioImageSuiteLite import io_operations # Adjusted import
+from TransiScope import io_operations # Adjusted import
 # You'll need a sample .avi file for testing. Place it in e.g., tests/data/
 # For now, many tests will be placeholders or require mocking.
 

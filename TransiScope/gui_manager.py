@@ -27,10 +27,10 @@ from . import utilities
 # Setup logging for the GUI
 logger = utilities.setup_logging() # Use the app-specific logger
 
-class BioImageSuiteLiteGUI:
+class TransiScopeGUI:
     def __init__(self, viewer: napari.Viewer):
         self.viewer = viewer
-        self.viewer.title = "BioImageSuiteLite v0.1"
+        self.viewer.title = "TransiScope v1.0"
         
         # --- Internal State ---
         self.raw_frames: Optional[List[np.ndarray]] = None
@@ -258,7 +258,7 @@ class BioImageSuiteLiteGUI:
         splitter.setSizes([int(self.viewer.window.qt_viewer.height() * 0.6), int(self.viewer.window.qt_viewer.height() * 0.4)]) # Initial sizes
 
         self.main_layout.addWidget(splitter)
-        self.viewer.window.add_dock_widget(self.main_widget, name="BioImageSuiteLite Controls", area='right')
+        self.viewer.window.add_dock_widget(self.main_widget, name="TransiScope Controls", area='right')
         
         # Enable tooltips and set display duration
         from qtpy.QtWidgets import QToolTip
@@ -804,12 +804,12 @@ def main():
     utilities.setup_logging(level=logging.INFO) # Ensure logging is set up at least once globally
     try:
         viewer = napari.Viewer()
-        gui = BioImageSuiteLiteGUI(viewer) # The GUI class will add its widget
+        gui = TransiScopeGUI(viewer) # The GUI class will add its widget
         napari.run()
     except Exception as e:
         # This is a last resort catch for critical startup errors.
         # Individual operations should have their own error handling.
-        logger.critical(f"Critical error launching BioImageSuiteLite: {e}", exc_info=True)
+        logger.critical(f"Critical error launching TransiScope: {e}", exc_info=True)
         # Optionally show a system-level error dialog if possible outside Napari context
         # from qtpy.QtWidgets import QMessageBox
         # app = napari.qt.get_app() # Get or create a QApplication

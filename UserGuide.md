@@ -1,23 +1,23 @@
 ## Step-by-Step Guide for a General User (Using the GUI)
 
-Here's a guide on how a general user would typically use the `BioImageSuiteLite` GUI to analyze an AVI file, assuming all features are implemented and working.
+Here's a guide on how a general user would typically use the `TransiScope` GUI to analyze an AVI file, assuming all features are implemented and working.
 
 **Objective:** Load a video file (AVI or multi-page TIFF) of cells, define regions of interest (ROIs) around cells, detect cellular events (e.g., fluorescence changes) within these ROIs over time, and get a normalized event rate.
 
 ---
 
-**BioImageSuiteLite: User Workflow Guide**
+**TransiScope: User Workflow Guide**
 
 **Step 1: Launch the Application**
 
 * Open your terminal or command prompt.
 * Activate your Python virtual environment (if you used one for installation).
-* Type `bioimagesuitelite` and press Enter.
-* The BioImageSuiteLite window will open, integrated with the Napari viewer. You should see a "BioImageSuiteLite Controls" panel docked, likely on the right.
+* Type `transiscope` and press Enter.
+* The TransiScope window will open, integrated with the Napari viewer. You should see a "TransiScope Controls" panel docked, likely on the right.
 
 **Step 2: Load Your Video File**
 
-1. In the "BioImageSuiteLite Controls" panel, under the "1. File Operations" section, click the **"Load File"** button.
+1. In the "TransiScope Controls" panel, under the "1. File Operations" section, click the **"Load File"** button.
 2. A file dialog will appear. Navigate to the location of your video file (`.avi` or `.tif`/`.tiff`), select it, and click "Open".
 3. **Observe:**
    * The main Napari viewer will display the first frame of your video, converted to greyscale. You can use the slider at the bottom (for the 'T' or time dimension) to scroll through the frames of your video.

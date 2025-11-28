@@ -42,3 +42,6 @@ examples/*.avi
 examples/*.tif
 examples/*.csv
 setup_organization.md
+
+# Local documentation - keep private
+JOSS_CHECKLIST.md

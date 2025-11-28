@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "TransiScope: An Interactive Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy"
+version: 1.0.0
+doi: 10.5281/zenodo.16789347
+date-released: 2025-11-28
+url: "https://github.com/InnovationLine/TransiScope"
+repository-code: "https://github.com/InnovationLine/TransiScope"
+license: MIT
+authors:
+  - family-names: "Dasgupta"
+    given-names: "Rinki"
+    email: "rinkidsgpt@gmail.com"
+    affiliation: "Department of Psychiatry and Neuroscience, Dell Medical Center at University of Texas at Austin"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "Das"
+    given-names: "Kaushik"
+    email: "kaushik.k.das@gmail.com"
+    affiliation: "Department of Computer Applications, National Institute of Technology Jharkhand"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+keywords:
+  - microscopy
+  - image-analysis
+  - event-detection
+  - calcium-imaging
+  - fluorescence-microscopy
+  - napari
+  - python
+  - neuroscience
+  - cell-biology
+type: software
+abstract: "TransiScope is an open-source, user-friendly desktop application for detecting and analyzing transient events in time-lapse microscopy data. Built on Python and the Napari viewer, it provides an intuitive graphical interface for biologists to perform sophisticated temporal event analysis without programming expertise. Key features include interactive ROI management, data-driven parameter optimization, multiple event detection algorithms (DoG, Otsu thresholding), automated normalization, and complete algorithmic transparency through logging."
+

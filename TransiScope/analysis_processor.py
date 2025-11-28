@@ -1,4 +1,4 @@
-# BioImageSuiteLite/analysis_processor.py
+# TransiScope/analysis_processor.py
 import numpy as np
 from scipy.signal import find_peaks, peak_widths
 from scipy.ndimage import gaussian_filter1d

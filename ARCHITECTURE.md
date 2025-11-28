@@ -1,6 +1,6 @@
-# BioImageSuiteLite - Architecture
+# TransiScope - Architecture
 
-This document provides a high-level overview of the software architecture for BioImageSuiteLite. It is intended for developers who wish to contribute to the project.
+This document provides a high-level overview of the software architecture for TransiScope. It is intended for developers who wish to contribute to the project.
 
 ## Core Components
 
@@ -18,7 +18,7 @@ The diagram below illustrates the relationships and data flow between the major 
 graph TD
     subgraph UserInterface[User Interface Layer]
         NapariCore[Napari Viewer & Event Loop]
-        GUI_Controls["BioImageSuiteLiteGUI Dock Widget (gui_manager.py)"]
+        GUI_Controls["TransiScopeGUI Dock Widget (gui_manager.py)"]
         LogDisplayWidget["QTextEdit for Logs (in GUI_Controls)"]
         ROI_ShapesLayer[Napari Shapes Layer for ROIs]
     end
@@ -94,7 +94,7 @@ graph TD
 
 *   **User Interface Layer:**
     *   **Napari Viewer & Event Loop:** The core engine from Napari that handles image display, windowing, and the main event processing.
-    *   **BioImageSuiteLiteGUI Dock Widget:** The custom Qt widget (`gui_manager.py`) containing all buttons, input fields, and results tables, which is docked into the Napari viewer.
+    *   **TransiScopeGUI Dock Widget:** The custom Qt widget (`gui_manager.py`) containing all buttons, input fields, and results tables, which is docked into the Napari viewer.
     *   **Napari Shapes Layer for ROIs:** A specialized Napari layer used for drawing and managing Regions of Interest directly on the image.
 
 *   **Application Logic Layer:** These are the core, non-visual Python modules.

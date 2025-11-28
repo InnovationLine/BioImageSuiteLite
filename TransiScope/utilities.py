@@ -1,4 +1,4 @@
-# BioImageSuiteLite/utilities.py
+# TransiScope/utilities.py
 import logging
 import sys
 
@@ -16,7 +16,7 @@ def setup_logging(level=logging.INFO):
                 # logging.FileHandler("bioimagesuitelite.log")
             ]
         )
-    logger = logging.getLogger("BioImageSuiteLite") # Get a specific logger for the app
+    logger = logging.getLogger("TransiScope") # Get a specific logger for the app
     logger.info("Logging initialized.")
     return logger
 

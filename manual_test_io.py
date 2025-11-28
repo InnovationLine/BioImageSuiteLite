@@ -1,5 +1,5 @@
-from BioImageSuiteLite import io_operations
-from BioImageSuiteLite import utilities
+from TransiScope import io_operations
+from TransiScope import utilities
 import numpy as np
 import os
 

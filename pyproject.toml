@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "BioImageSuiteLite"
-version = "0.1.4"
+name = "TransiScope"
+version = "1.0.0"
 authors = [
   { name="Rinki Dasgupta", email="rinkidsgpt@gmail.com" },
   { name="Kaushik Das", email="kaushik.k.das@gmail.com" },
 ]
-description = "A Python-based GUI tool for cellular event detection from .avi and .tiff files."
+description = "A user-friendly tool for automated detection and analysis of transient events in time-lapse microscopy."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -34,11 +34,11 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/InnovationLine/BioImageSuiteLite" 
-"Bug Tracker" = "https://github.com/InnovationLine/BioImageSuiteLite/issues" 
+"Homepage" = "https://github.com/InnovationLine/TransiScope" 
+"Bug Tracker" = "https://github.com/InnovationLine/TransiScope/issues" 
 
 [project.scripts]
-bioimagesuitelite = "BioImageSuiteLite.gui_manager:main"
+transiscope = "TransiScope.gui_manager:main"
 
 [tool.setuptools]
-packages = ["BioImageSuiteLite"]
+packages = ["TransiScope"]

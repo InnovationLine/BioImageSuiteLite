@@ -1,8 +1,8 @@
-# BioImageSuiteLite/__init__.py
+# TransiScope/__init__.py
 """
-BioImageSuiteLite: A Python GUI tool for cellular event analysis.
+TransiScope: A Python GUI tool for transient event analysis in time-lapse microscopy.
 """
-__version__ = "0.1.3"
+__version__ = "1.0.0"
 
 # You can selectively import key functions or classes here if needed
 # for easier access from the package level, e.g.:
