@@ -10,11 +10,11 @@ tags:
   - napari
 authors:
   - name: Rinki Dasgupta
-    orcid: 0000-0000-0000-0000
+    orcid: 0009-0008-5478-840X
     affiliation: "1, 2"
   - name: Kaushik Das
     corresponding: true
-    orcid: 0000-0000-0000-0000
+    orcid: 0009-0009-8828-2631
     affiliation: 3
 affiliations:
  - name: Department of Psychiatry and Neuroscience, Dell Medical Center, University of Texas at Austin, Austin, TX, 78701, USA
@@ -26,7 +26,6 @@ affiliations:
 date: 28 November 2025
 bibliography: paper.bib
 ---
-
 # Summary
 
 Quantifying transient cellular events—such as calcium transients, vesicle exocytosis, and fluorescence fluctuations—is fundamental to understanding biological processes at the cellular level. `TransiScope` is an open-source, user-friendly desktop application built on Python and the Napari viewer that streamlines the complete workflow of detecting and analyzing such events in time-lapse microscopy data. The software provides an intuitive graphical interface that eliminates the need for programming expertise, while offering advanced features including interactive region-of-interest (ROI) management, data-driven parameter optimization, and multiple event detection algorithms (Difference of Gaussians, Otsu thresholding, step detection). Key innovations include automated parameter estimation from user-selected ROIs, complete algorithmic transparency through automated logging, and normalized quantification (events/sec/µm²) that enables direct comparison across experiments. TransiScope fills a critical usability gap in bioimage analysis, making sophisticated temporal event detection accessible to biologists without computational backgrounds.
@@ -38,7 +37,7 @@ Analyzing dynamic cellular processes from time-lapse microscopy requires detecti
 Existing bioimage analysis platforms face specific limitations for temporal event analysis:
 
 - **ImageJ/Fiji** [@Schindelin2012] with plugins like TrackMate [@Cayuela2023] excel at particle tracking and segmentation but require complex, multi-step workflows for temporal event detection within user-defined regions
-- **CellProfiler** [@Carpenter2006] is optimized for high-throughput segmentation-based analysis but not for analyzing rapid intensity-based temporal events  
+- **CellProfiler** [@Carpenter2006] is optimized for high-throughput segmentation-based analysis but not for analyzing rapid intensity-based temporal events
 - **Specialized tools** like ThunderSTORM [@Ovesny2014] focus on single-molecule localization microscopy, not functional temporal dynamics
 
 This landscape reveals a critical usability gap: **no existing tool provides a unified, user-friendly workflow for biologists to perform robust temporal event analysis without coding skills.**
@@ -46,11 +45,8 @@ This landscape reveals a critical usability gap: **no existing tool provides a u
 `TransiScope` addresses this gap through four key innovations:
 
 1. **Interactive, data-driven parameter optimization**: Users draw multiple ROIs over representative cellular regions, and the software automatically analyzes their averaged intensity traces to propose optimal detection parameters. This eliminates subjective manual tuning while adapting to the specific signal characteristics of each dataset [@Held2013].
-
 2. **Unified workflow in a single GUI**: Complete analysis from file import (AVI, TIFF) through ROI drawing, event detection, and results export occurs within one intuitive interface built on Napari [@Chiu2022]—no scripting, macro programming, or file format conversions required.
-
 3. **Automated normalization for cross-experiment comparison**: Event rates are automatically normalized by both time and ROI area (events/sec/µm²), accounting for variations in acquisition duration and region size that would otherwise confound biological interpretation.
-
 4. **Complete algorithmic transparency and reproducibility**: All parameters, detection thresholds, and processing steps are automatically logged with timestamps, ensuring that analyses are fully reproducible and scientifically auditable [@Dudda2025].
 
 By making sophisticated event detection accessible while maintaining scientific rigor, `TransiScope` empowers a broader community of researchers to perform quantitative temporal analysis of cellular dynamics. The software is particularly valuable for laboratories studying neurotransmission, calcium signaling, exocytosis, and other rapid cellular processes where manual analysis is prohibitively time-consuming and prone to observer bias.
@@ -68,11 +64,13 @@ By making sophisticated event detection accessible while maintaining scientific 
 ## Key Features
 
 ### Data Import and Preprocessing
+
 - Supports `.avi` video files and multi-page `.tif`/`.tiff` image stacks
 - Automatic conversion of color videos to greyscale
 - Microscope calibration input (pixel size in µm) for physical unit calculations
 
 ### Interactive ROI Management
+
 - Multiple drawing modes (rectangle, ellipse, polygon, freehand path) via Napari's shapes layer
 - Real-time visualization of ROIs overlaid on time-lapse data
 - ROI area calculation using Shapely for accurate normalization
@@ -104,6 +102,7 @@ All calculations are logged, ensuring full transparency and reproducibility.
 - **Normalization**: Final event counts divided by video duration (seconds) and ROI area (µm²) to yield standardized rates for cross-experiment comparison
 
 ### Results Export
+
 - Detailed CSV output with event timing, type, ROI ID, and normalized rates
 - Metadata headers include analysis timestamp and parameters
 - UTF-8-SIG encoding ensures proper rendering of special characters (µm)
@@ -113,7 +112,7 @@ All calculations are logged, ensuring full transparency and reproducibility.
 The software has been validated using publicly available microscopy datasets [@Hummer2017; @Hummer2020], demonstrating:
 
 - **High specificity**: Background ROIs correctly identify zero events (no false positives)
-- **Biological sensitivity**: High-K⁺ stimulation datasets show expected 2.5-3× increase in event rates compared to unstimulated conditions  
+- **Biological sensitivity**: High-K⁺ stimulation datasets show expected 2.5-3× increase in event rates compared to unstimulated conditions
 - **Objectivity**: Automated Otsu thresholding eliminates false positives that arise with manual thresholding
 - **Parameter robustness**: Systematic variation of temporal filtering parameters (min_sep) shows expected and interpretable effects on event counts
 
@@ -137,4 +136,3 @@ A comprehensive Jupyter notebook tutorial is included in the `examples/` directo
 We thank the authors of the publicly available microscopy datasets used for validation [@Hummer2017; @Hummer2020]. This work leverages the open-source scientific Python ecosystem, particularly Napari, NumPy, SciPy, and scikit-image. Development was conducted as an independent open-source initiative without dedicated institutional funding.
 
 # References
-
