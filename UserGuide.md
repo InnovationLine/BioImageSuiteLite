@@ -33,28 +33,23 @@ Here's a guide on how a general user would typically use the `TransiScope` GUI t
 **Step 4: Define Regions of Interest (ROIs) Around Cells**
 
 1. Ensure your video is on a frame where the cells you want to analyze are clearly visible (use the time slider if needed).
-2. In the "2. Preprocessing & ROI" section, click the **"Activate ROI Drawing"** button.
-   * The button text might change to "Finish ROI Drawing" or similar, and a Napari notification might indicate ROI drawing mode is active.
-   * The mouse cursor in the Napari viewer will change, usually to a crosshair or polygon drawing tool.
+2. In the "2. Preprocessing & ROI" section, select your preferred **ROI drawing mode** from the dropdown menu (Rectangle, Ellipse, Polygon, or Freehand Path).
 3. **Draw an ROI:**
-   * Move your mouse to a corner of the first cell you want to analyze in the image viewer.
-   * **Left-click** to place the first vertex (point) of your polygon ROI.
-   * Move the mouse to the next point around the cell boundary and **left-click** again to place another vertex.
-   * Continue clicking around the cell outline until you have enclosed it.
-   * To finish the current ROI polygon:
-     * Often, a **double-click** will complete the polygon.
-     * Alternatively, some tools might require you to click near the first point again or press `Enter` or `Esc`. Check Napari's status bar or any GUI notifications for specific instructions.
-   * The drawn ROI should appear overlaid on your image (e.g., as a red outline).
-4. **Draw More ROIs:** Repeat step 5.3 for each cell you want to analyze. Each new completed polygon will be a separate ROI.
-5. **When Done Drawing All ROIs:** Click the **"Finish ROI Drawing"** (or similarly named) button again. This will typically switch the shapes layer mode to "select" or "pan/zoom," so you don't accidentally draw more ROIs.
-   * *Note: The GUI should provide feedback on the number of ROIs drawn or their IDs.*
+   * Simply **click and hold the left mouse button**, then drag to draw your region of interest around the cell.
+   * Release the mouse button to complete the ROI.
+   * The drawn ROI will appear overlaid on your image with a unique number (starting from 1).
+   * Each ROI is automatically numbered sequentially (1, 2, 3, etc.) for easy identification on screen and later verification in results.
+4. **Draw More ROIs:** 
+   * Repeat step 3 for each additional cell you want to analyze.
+   * Each new ROI will automatically receive the next sequential number.
+5. **ROI Numbering:**
+   * ROI numbers are displayed directly on the image viewer for easy reference.
+   * These numbers correspond to the ROI IDs in your analysis results, making it simple to match results to specific regions.
 
 **Step 5: (Optional) Manage ROIs**
 
-* **Selecting an ROI:** If the shapes layer is in "select" mode, you should be able to click on an existing ROI outline to select it.
-* **Modifying an ROI:** Once selected, you might be able to drag its vertices to adjust the shape.
-* **Deleting an ROI:** There might be a "Delete Selected ROI" button, or you might select an ROI and press the `Delete` key (this depends on how Napari's shapes layer interaction is configured).
-* **Clear All ROIs:** If you want to start over, click the **"Clear All ROIs"** button. This will remove all drawn ROIs.
+* **Deleting an ROI:** Select an ROI by clicking on it, then press the `Delete` key to remove it. The remaining ROIs will retain their original numbers.
+* **Clear All ROIs:** If you want to start over, click the **"Clear All ROIs"** button. This will remove all drawn ROIs and reset the numbering.
 
 **Step 6: Set Analysis Parameters**
 
