@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://img.shields.io/pypi/v/transiscope.svg)](https://pypi.org/project/transiscope/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16789347.svg)](https://doi.org/10.5281/zenodo.16789347)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17762015.svg)](https://doi.org/10.5281/zenodo.16789347)
 
 **An Interactive Open-Source Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy**
 
@@ -27,6 +27,7 @@ Quantifying transient cellular events—such as calcium transients, vesicle fusi
 - **Complex multi-step workflows**: Juggling multiple tools and file formats
 
 Existing bioimage analysis platforms face specific limitations:
+
 - **ImageJ/Fiji** with plugins like TrackMate excel at particle tracking but require complex, multi-step workflows for temporal event detection
 - **CellProfiler** is optimized for high-throughput segmentation but not for analyzing rapid intensity-based temporal events within user-defined regions
 - **Specialized tools** like ThunderSTORM focus on single-molecule localization, not functional temporal dynamics
@@ -80,8 +81,7 @@ pip install git+https://github.com/InnovationLine/TransiScope.git
    ```
 2. **Load Data:**
    Click the **"Load File"** button to open your microscopy data (`.avi` or `.tif`/`.tiff`).
-3. **Draw an ROI:**  
-   Select your preferred **ROI drawing mode** (Rectangle, Ellipse, Polygon, or Freehand Path) from the dropdown menu in the "Preprocessing & ROI" section, then draw one or more regions around the cells you want to analyze. The interface now provides helpful tooltips for all controls.
+3. **Draw an ROI:**Select your preferred **ROI drawing mode** (Rectangle, Ellipse, Polygon, or Freehand Path) from the dropdown menu in the "Preprocessing & ROI" section, then draw one or more regions around the cells you want to analyze. The interface now provides helpful tooltips for all controls.
 4. **Run Analysis:**
    Adjust parameters in the GUI dock widget as needed (e.g., Gaussian sigma, thresholding method). Click the **"Run Analysis"** button to start processing.
 5. **Explore Results:**
@@ -152,4 +152,4 @@ This license permits free use, modification, and distribution of the software, p
 
 *TransiScope* is academic software. If you use it in your research, please cite it as follows:
 
-> Dasgupta, Rinki, & Das, Kaushik. (2025). *TransiScope* (Version 1.0.0) \[Software\]. Zenodo. https://doi.org/10.5281/zenodo.16789347
+> Dasgupta, Rinki, & Das, Kaushik. (2025). *TransiScope* (Version 1.0.0) \[Software\]. Zenodo. https://doi.org/10.5281/zenodo.17762015

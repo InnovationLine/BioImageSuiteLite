@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "TransiScope: An Interactive Platform for Automated Detection and Analysis of Transient Events in Time-Lapse Microscopy"
 version: 1.0.0
-doi: 10.5281/zenodo.16789347
+doi: 10.5281/zenodo.17762015
 date-released: 2025-11-28
 url: "https://github.com/InnovationLine/TransiScope"
 repository-code: "https://github.com/InnovationLine/TransiScope"
